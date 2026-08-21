@@ -93,36 +93,45 @@ void setup()
   ExtInt::EnableInterrupt();
 }
 
-const char* operations[2] =
+struct Operation
 {
-  "operation1...   ",
-  "operation2...   ",
+  const char* msg;
+  int updatePeriodMs;
 };
 
-void UpdateOperation()
+static constexpr Operation operations[2] =
 {
-  static uint8_t currentOperationIndex = 0U;
-  static uint8_t currentProgressBarIndex = 0U;
+  { "operation1...", 10 },
+  { "operation2...", 300 },
+};
 
-  if (currentProgressBarIndex == 0U)
-  {
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print(operations[currentOperationIndex]);
-    currentOperationIndex = (currentOperationIndex == 0) ? 1 : 0;
-  }
-
-  lcd.setCursor(currentProgressBarIndex, 1);
-  lcd.write(255);
-  currentProgressBarIndex = (currentProgressBarIndex < 15) ? currentProgressBarIndex + 1 : 0;
+void ClearLcd()
+{     
+  lcd.setCursor(0, 0);
+  lcd.print("                ");
+  lcd.setCursor(0, 1);
+  lcd.print("                ");
 }
 
 void UpdateLcd()
 {
-  if (millis() - timer >= 200)
+  static uint8_t currentOperationIndex = 0U;
+  static uint8_t currentProgressBarIndex = 0U;
+
+  if (millis() - timer >= operations[currentOperationIndex].updatePeriodMs)
   {
     timer = millis();
-    UpdateOperation();
+    if (currentProgressBarIndex == 0U)
+    {
+      ClearLcd();
+      lcd.setCursor(0, 0);
+      currentOperationIndex = (currentOperationIndex == 0) ? 1 : 0;
+      lcd.print(operations[currentOperationIndex].msg);
+    }
+  
+    lcd.setCursor(currentProgressBarIndex, 1);
+    lcd.write(255);
+    currentProgressBarIndex = (currentProgressBarIndex < 15) ? currentProgressBarIndex + 1 : 0;
   }
 }
 
