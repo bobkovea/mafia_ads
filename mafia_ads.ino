@@ -3,34 +3,10 @@
 #include "player.h"
 #include "extint.h"
 #include "lcdmanager.h"
+#include "statemachine.h"
 
 #define ISR_PIN 2
 #define BUZZER_PIN 9
-
-// ============ Состояния ============
-enum class State : uint8_t
-{
-  Card,
-  Music
-};
-
-// ============ События ============
-enum class Event : uint8_t
-{
-  None = 0x00,
-  CardDetected = 0x01,
-  MusicFinished = 0x02
-};
-
-
-// ============ Таблица переходов ============
-struct Transition
-{
-  State currentState;
-  uint8_t event;
-  State nextState;
-  void (*action)();
-};
 
 // ============ Прототипы действий ============
 void StartMusic();
@@ -42,14 +18,16 @@ const Transition transitions[] = {
   {State::Music, (uint8_t)Event::MusicFinished, State::Card, StartCard},
 };
 
+static constexpr uint8_t TransitionsCount = sizeof(transitions) / sizeof(transitions[0]);
+static_assert(TransitionsCount > 0, "Transitions array cannot be empty");
+
 // ============ Глобальные переменные ============
-volatile State state = State::Card;
-volatile uint8_t events = 0;
+StateMachine stateMachine(transitions, TransitionsCount, State::Card);
 Player player(BUZZER_PIN);
 
 static constexpr Operation operations[] =
 {
-  { "operation1...", 100 },
+  { "Поиск в БД...", 100 },
   { "operation2...", 200 },
 };
 
@@ -71,28 +49,6 @@ void StartCard()
   ExtInt::EnableInterrupt();
 }
 
-// ============ Обработка переходов ============
-void ProcessTransitions()
-{
-  if (events != (uint8_t)Event::None)
-  {
-    const uint8_t currentEvents = events;
-    events = (uint8_t)Event::None;
-
-    for (const auto& trans : transitions)
-    {
-      const bool stateMatches = trans.currentState == state;
-      const bool eventMatches = (trans.event & currentEvents) != 0;
-      if (stateMatches && eventMatches)
-      {
-        trans.action();
-        state = trans.nextState;
-        break;
-      }
-    }
-  }
-}
-
 
 void setup()
 {
@@ -105,8 +61,9 @@ void setup()
 
 void loop()
 {
-  ProcessTransitions();
-  if (state == State::Music)
+  stateMachine.Process();
+  const State currentState = stateMachine.GetCurrentState();
+  if (currentState == State::Music)
   {
     player.Loop();
     lcdManager.Update();
@@ -114,7 +71,7 @@ void loop()
     if (!player.IsActive())
     {
       player.ChangeMelody();
-      events |= (uint8_t)Event::MusicFinished;
+      stateMachine.TriggerEvent(Event::MusicFinished);
     }
   }
 }
@@ -122,6 +79,6 @@ void loop()
 // ============ Прерывание карты ============
 ISR(INT0_vect)
 {
-  events |= (uint8_t)Event::CardDetected;
+  stateMachine.TriggerEvent(Event::CardDetected);
   ExtInt::DisableInterrupt();
 }
