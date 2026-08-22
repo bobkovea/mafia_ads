@@ -10,7 +10,7 @@ enum class Duration : uint16_t {
   H = W / 2,
   Q = W / 4,
   E = W / 8,
-  S = W / 15,
+  S = W / 16,
   DE = E + S,
   DQ = Q + E,
   DH = H + Q

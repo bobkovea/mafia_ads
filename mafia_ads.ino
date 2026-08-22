@@ -2,6 +2,9 @@
 #include "extint.h"
 #include "lcdmanager.h"
 #include "statemachine.h"
+#include "melodies/mario.h"
+#include "melodies/harry.h"
+#include "melodies/godfather.h"
 
 #define ISR_PIN 2
 #define BUZZER_PIN 9
@@ -36,6 +39,7 @@ static_assert(OperationsCount > 0, "Operations array cannot be empty");
 
 BuzzerMelody melodies[]
 {
+ BuzzerMelody(BUZZER_PIN, Godfather::melodyLength, Godfather::melody),
  BuzzerMelody(BUZZER_PIN, Harry::melodyLength, Harry::melody),
  BuzzerMelody(BUZZER_PIN, Mario::melodyLength, Mario::melody),
 };

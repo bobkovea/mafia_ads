@@ -1,8 +1,6 @@
 #pragma once
 
 #include <BuzzerMelody.h>
-#include "melodies/mario.h"
-#include "melodies/harry.h"
 
 class MusicPlayer
 {
