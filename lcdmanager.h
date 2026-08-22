@@ -44,7 +44,9 @@ class LcdManager
         // Вывод операции при необходимости
         if (_needUpdateOperation)
         {
-          Clear();
+           //Clear();
+          _lcd->setCursor(0, 1);
+          _lcd->print("                ");
           _lcd->setCursor(0, 0);
           _lcd->print(_operations[_currentOperationIndex].msg);
           _needUpdateOperation = false;
@@ -74,13 +76,4 @@ class LcdManager
     bool _needUpdateOperation;
     uint32_t _timer;
     uint8_t _barLength;
-
-    // Очистка экрана
-    void Clear()
-    {
-      _lcd->setCursor(0, 0);
-      _lcd->print("                ");
-      _lcd->setCursor(0, 1);
-      _lcd->print("                ");
-    }
 };

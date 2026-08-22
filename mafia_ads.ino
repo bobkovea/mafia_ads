@@ -1,6 +1,4 @@
-#define _LCD_TYPE 1  // для работы с I2C дисплеями
-#include <LCD_1602_RUS_ALL.h>
-#include "player.h"
+#include "musicplayer.h"
 #include "extint.h"
 #include "lcdmanager.h"
 #include "statemachine.h"
@@ -23,25 +21,37 @@ static_assert(TransitionsCount > 0, "Transitions array cannot be empty");
 
 // ============ Глобальные переменные ============
 StateMachine stateMachine(transitions, TransitionsCount, State::Card);
-Player player(BUZZER_PIN);
 
 static constexpr Operation operations[] =
-{
-  { "Поиск в БД...", 100 },
-  { "operation2...", 200 },
+{ //"XXXXXXXXXXXXXXXX"
+  { "ПOИCK В БАЗЕ... ", 100},
+  { "СЪЕМ ПАТТЕРНА...", 100},
+  { "РАСЧЕТ МОДЕЛИ...", 100},
+  { "ПОДБОР РОЛИ...  ", 100},
 };
 
 // Автоматически вычисляем размер массива
 static constexpr uint8_t OperationsCount = sizeof(operations) / sizeof(operations[0]);
 static_assert(OperationsCount > 0, "Operations array cannot be empty");
 
+BuzzerMelody melodies[]
+{
+ { BUZZER_PIN, Harry::melodyLength, Harry::melody },
+ { BUZZER_PIN, Mario::melodyLength, Mario::melody },
+};
+
+// Автоматически вычисляем размер массива
+static constexpr uint8_t MelodiesCount = sizeof(melodies) / sizeof(melodies[0]);
+static_assert(MelodiesCount > 0, "Melodies array cannot be empty");
+
+MusicPlayer musicPlayer(melodies, MelodiesCount, 0);
 LCD_1602_RUS lcd(0x27, 16, 2);
 LcdManager lcdManager(&lcd, operations, OperationsCount);
 
 // ============ Действия ============
 void StartMusic()
 {
-  player.Play();
+  musicPlayer.Play();
 }
 
 void StartCard()
@@ -50,11 +60,12 @@ void StartCard()
 }
 
 
+
 void setup()
 {
-  lcdManager.Begin();
   pinMode(BUZZER_PIN, OUTPUT);
   pinMode(ISR_PIN, INPUT_PULLUP);
+  lcdManager.Begin();
   ExtInt::ConfigInterrupt();
   ExtInt::EnableInterrupt();
 }
@@ -65,12 +76,12 @@ void loop()
   const State currentState = stateMachine.GetCurrentState();
   if (currentState == State::Music)
   {
-    player.Loop();
+    musicPlayer.Loop();
     lcdManager.Update();
 
-    if (!player.IsActive())
+    if (!musicPlayer.IsActive())
     {
-      player.ChangeMelody();
+      musicPlayer.ChangeMelody();
       stateMachine.TriggerEvent(Event::MusicFinished);
     }
   }
