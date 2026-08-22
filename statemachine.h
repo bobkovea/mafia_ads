@@ -48,7 +48,7 @@ class StateMachine
     }
 
     // Обработка переходов
-    void Process()
+    State Process()
     {
       if (mEvents != (uint8_t)Event::None)
       {
@@ -76,11 +76,7 @@ class StateMachine
           }
         }
       }
-    }
 
-    // Получение текущего состояния
-    State GetCurrentState() const
-    {
       return mCurrentState;
     }
 

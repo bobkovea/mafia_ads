@@ -4,7 +4,7 @@
 
 namespace Godfather {
 
-static constexpr uint16_t BaseTime = 1750U;
+static constexpr uint16_t BaseTime = 750;
 
 enum class Duration : uint16_t {
   W = BaseTime,

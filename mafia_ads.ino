@@ -1,3 +1,4 @@
+#include <EEPROM.h>
 #include "musicplayer.h"
 #include "extint.h"
 #include "lcdmanager.h"
@@ -39,9 +40,9 @@ static_assert(OperationsCount > 0, "Operations array cannot be empty");
 
 BuzzerMelody melodies[]
 {
- BuzzerMelody(BUZZER_PIN, Godfather::melodyLength, Godfather::melody),
- BuzzerMelody(BUZZER_PIN, Harry::melodyLength, Harry::melody),
- BuzzerMelody(BUZZER_PIN, Mario::melodyLength, Mario::melody),
+  BuzzerMelody(BUZZER_PIN, Godfather::melodyLength, Godfather::melody),
+  BuzzerMelody(BUZZER_PIN, Harry::melodyLength, Harry::melody),
+  BuzzerMelody(BUZZER_PIN, Mario::melodyLength, Mario::melody),
 };
 
 // Автоматически вычисляем размер массива
@@ -55,6 +56,11 @@ LcdManager lcdManager(&lcd, operations, OperationsCount);
 // ============ Действия ============
 void StartMusic()
 {
+  uint32_t cardsDetected;
+  EEPROM.get(0, cardsDetected);
+  cardsDetected = (cardsDetected == UINT32_MAX) ? 0 : cardsDetected + 1;
+  EEPROM.put(0, cardsDetected);
+
   musicPlayer.Play();
 }
 
@@ -63,8 +69,6 @@ void StartCard()
   ExtInt::EnableInterrupt();
 }
 
-
-
 void setup()
 {
   pinMode(BUZZER_PIN, OUTPUT);
@@ -72,28 +76,48 @@ void setup()
   lcdManager.Begin();
   ExtInt::ConfigInterrupt();
   ExtInt::EnableInterrupt();
+
+  uint32_t tmp;
+  EEPROM.get(0, tmp);
+  if (tmp == UINT32_MAX)
+  {
+    EEPROM.put(0, tmp);
+  }
 }
 
 void loop()
 {
-  stateMachine.Process();
-  const State currentState = stateMachine.GetCurrentState();
-  if (currentState == State::Music)
+  const State currentState = stateMachine.Process();
+  
+  switch (currentState)
   {
-    musicPlayer.Loop();
-    lcdManager.Update();
+    case State::Card:
+//      uint32_t var;
+//      EEPROM.get(0, var);
+//      lcd.setCursor(0, 0);
+//      lcd.print(var, 10);
+//      delay(100);
+      break;
 
-    if (!musicPlayer.IsActive())
-    {
-      musicPlayer.ChangeMelody();
-      stateMachine.TriggerEvent(Event::MusicFinished);
-    }
+    case State::Music:
+      musicPlayer.Loop();
+      lcdManager.Update();
+
+      if (!musicPlayer.IsActive())
+      {
+        musicPlayer.ChangeMelody();
+        stateMachine.TriggerEvent(Event::MusicFinished);
+      }
+      break;
+
+    default:
+      break;
   }
 }
 
 // ============ Прерывание карты ============
 ISR(INT0_vect)
 {
-  stateMachine.TriggerEvent(Event::CardDetected);
   ExtInt::DisableInterrupt();
+  stateMachine.TriggerEvent(Event::CardDetected);
 }
