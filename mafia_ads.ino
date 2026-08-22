@@ -36,8 +36,8 @@ static_assert(OperationsCount > 0, "Operations array cannot be empty");
 
 BuzzerMelody melodies[]
 {
- { BUZZER_PIN, Harry::melodyLength, Harry::melody },
- { BUZZER_PIN, Mario::melodyLength, Mario::melody },
+ BuzzerMelody(BUZZER_PIN, Harry::melodyLength, Harry::melody),
+ BuzzerMelody(BUZZER_PIN, Mario::melodyLength, Mario::melody),
 };
 
 // Автоматически вычисляем размер массива
