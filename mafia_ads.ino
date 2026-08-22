@@ -2,6 +2,7 @@
 #include <LCD_1602_RUS_ALL.h>
 #include "player.h"
 #include "extint.h"
+#include "lcdmanager.h"
 
 #define ISR_PIN 2
 #define BUZZER_PIN 9
@@ -45,9 +46,19 @@ const Transition transitions[] = {
 volatile State state = State::Card;
 volatile uint8_t events = 0;
 Player player(BUZZER_PIN);
+
+static constexpr Operation operations[] =
+{
+  { "operation1...", 100 },
+  { "operation2...", 200 },
+};
+
+// Автоматически вычисляем размер массива
+static constexpr uint8_t OperationsCount = sizeof(operations) / sizeof(operations[0]);
+static_assert(OperationsCount > 0, "Operations array cannot be empty");
+
 LCD_1602_RUS lcd(0x27, 16, 2);
-int progress = 0;
-unsigned long timer = 0;
+LcdManager lcdManager(&lcd, operations, OperationsCount);
 
 // ============ Действия ============
 void StartMusic()
@@ -85,54 +96,11 @@ void ProcessTransitions()
 
 void setup()
 {
-  lcd.init();
-  lcd.backlight();
+  lcdManager.Begin();
   pinMode(BUZZER_PIN, OUTPUT);
   pinMode(ISR_PIN, INPUT_PULLUP);
   ExtInt::ConfigInterrupt();
   ExtInt::EnableInterrupt();
-}
-
-struct Operation
-{
-  const char* msg;
-  int updatePeriodMs;
-};
-
-static constexpr Operation operations[2] =
-{
-  { "operation1...", 10 },
-  { "operation2...", 300 },
-};
-
-void ClearLcd()
-{     
-  lcd.setCursor(0, 0);
-  lcd.print("                ");
-  lcd.setCursor(0, 1);
-  lcd.print("                ");
-}
-
-void UpdateLcd()
-{
-  static uint8_t currentOperationIndex = 0U;
-  static uint8_t currentProgressBarIndex = 0U;
-
-  if (millis() - timer >= operations[currentOperationIndex].updatePeriodMs)
-  {
-    timer = millis();
-    if (currentProgressBarIndex == 0U)
-    {
-      ClearLcd();
-      lcd.setCursor(0, 0);
-      currentOperationIndex = (currentOperationIndex == 0) ? 1 : 0;
-      lcd.print(operations[currentOperationIndex].msg);
-    }
-  
-    lcd.setCursor(currentProgressBarIndex, 1);
-    lcd.write(255);
-    currentProgressBarIndex = (currentProgressBarIndex < 15) ? currentProgressBarIndex + 1 : 0;
-  }
 }
 
 void loop()
@@ -141,7 +109,7 @@ void loop()
   if (state == State::Music)
   {
     player.Loop();
-    UpdateLcd();
+    lcdManager.Update();
 
     if (!player.IsActive())
     {
