@@ -1,25 +1,16 @@
 #pragma once
-#include "notes.h"
 
-namespace Mario {
+#include "melodybase.h"
 
-static constexpr uint16_t BaseTime = 1000U;
+namespace Mario
+{
+	
+static constexpr uint16_t Tempo = 933U;
+#undef N
+#define N(note, dur) CreateNote(note, dur, Tempo)
 
-enum class Duration : uint16_t {
-  W = BaseTime,
-  H = W / 2,
-  Q = W / 4,
-  E = W / 8,
-  S = W / 16,
-  DE = E + S,
-  DQ = Q + E,
-  DH = H + Q
-};
-
-// Макрос для создания ноты
-#define N(note, dur) { NOTE_##note, (uint16_t)Duration::dur }
-
-const Note melody[] PROGMEM = {
+const Note melody[] PROGMEM =
+{
   // Такт 1
   N(E5, S), N(E5, E), N(E5, E), N(C5, S), N(E5, E), N(G5, H),
 
