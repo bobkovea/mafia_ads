@@ -2,13 +2,13 @@
 
 #include "melodybase.h"
 
+namespace Godfather
+{
+	
 static constexpr uint16_t Tempo = 1333U;
 #undef N
 #define N(note, dur) CreateNote(note, dur, Tempo)
 
-namespace Godfather
-{
-	
 const Note melody[] PROGMEM =
 {
   N(REST, Q), N(B3, Q), N(E4, Q), N(G4, Q),

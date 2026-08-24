@@ -6,6 +6,7 @@
 #include "melodies/mario.h"
 #include "melodies/harry.h"
 #include "melodies/godfather.h"
+#include "melodies/pinkpanther.h"
 
 #define ISR_PIN 2
 #define BUZZER_PIN 9
@@ -19,6 +20,10 @@ const Transition transitions[] = {
   {State::Card, (uint8_t)Event::CardDetected, State::Music, StartMusic},
   {State::Music, (uint8_t)Event::MusicFinished, State::Card, StartCard},
 };
+
+
+
+
 
 static constexpr uint8_t TransitionsCount = sizeof(transitions) / sizeof(transitions[0]);
 static_assert(TransitionsCount > 0, "Transitions array cannot be empty");
@@ -40,6 +45,7 @@ static_assert(OperationsCount > 0, "Operations array cannot be empty");
 
 BuzzerMelody melodies[]
 {
+  BuzzerMelody(BUZZER_PIN, PinkPanther::melodyLength, PinkPanther::melody),
   BuzzerMelody(BUZZER_PIN, Godfather::melodyLength, Godfather::melody),
   BuzzerMelody(BUZZER_PIN, Harry::melodyLength, Harry::melody),
   BuzzerMelody(BUZZER_PIN, Mario::melodyLength, Mario::melody),
@@ -88,15 +94,15 @@ void setup()
 void loop()
 {
   const State currentState = stateMachine.Process();
-  
+
   switch (currentState)
   {
     case State::Card:
-//      uint32_t var;
-//      EEPROM.get(0, var);
-//      lcd.setCursor(0, 0);
-//      lcd.print(var, 10);
-//      delay(100);
+      //      uint32_t var;
+      //      EEPROM.get(0, var);
+      //      lcd.setCursor(0, 0);
+      //      lcd.print(var, 10);
+      //      delay(100);
       break;
 
     case State::Music:
