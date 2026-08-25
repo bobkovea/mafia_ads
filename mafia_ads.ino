@@ -47,8 +47,8 @@ BuzzerMelody melodies[]
 {
   //BuzzerMelody(BUZZER_PIN, Aha::melodyLength, Aha::melody),
  // BuzzerMelody(BUZZER_PIN, Pirates::melodyLength, Pirates::melody),
-  //BuzzerMelody(BUZZER_PIN, PinkPanther::melodyLength, PinkPanther::melody),
-  BuzzerMelody(BUZZER_PIN, Godfather::melodyLength, Godfather::melody),
+  BuzzerMelody(BUZZER_PIN, PinkPanther::melodyLength, PinkPanther::melody),
+  //BuzzerMelody(BUZZER_PIN, Godfather::melodyLength, Godfather::melody),
 };
 
 // Автоматически вычисляем размер массива
