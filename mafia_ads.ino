@@ -3,11 +3,10 @@
 #include "extint.h"
 #include "lcdmanager.h"
 #include "statemachine.h"
-#include "melodies/mario.h"
-#include "melodies/harry.h"
 #include "melodies/godfather.h"
 #include "melodies/pinkpanther.h"
 #include "melodies/pirates.h"
+#include "melodies/aha.h"
 
 #define ISR_PIN 2
 #define BUZZER_PIN 9
@@ -46,11 +45,10 @@ static_assert(OperationsCount > 0, "Operations array cannot be empty");
 
 BuzzerMelody melodies[]
 {
+  BuzzerMelody(BUZZER_PIN, Aha::melodyLength, Aha::melody),
   BuzzerMelody(BUZZER_PIN, Pirates::melodyLength, Pirates::melody),
   BuzzerMelody(BUZZER_PIN, PinkPanther::melodyLength, PinkPanther::melody),
   BuzzerMelody(BUZZER_PIN, Godfather::melodyLength, Godfather::melody),
-  BuzzerMelody(BUZZER_PIN, Harry::melodyLength, Harry::melody),
-  BuzzerMelody(BUZZER_PIN, Mario::melodyLength, Mario::melody),
 };
 
 // Автоматически вычисляем размер массива
@@ -128,4 +126,4 @@ ISR(INT0_vect)
 {
   ExtInt::DisableInterrupt();
   stateMachine.TriggerEvent(Event::CardDetected);
-}
+} 
