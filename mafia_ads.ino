@@ -9,7 +9,8 @@
 #include "melodies/aha.h"
 
 #define ISR_PIN 2
-#define BUZZER_PIN 9
+#define BUZZER_PIN 3
+#define BACKLIGHT_PIN 9
 
 // ============ Прототипы действий ============
 void StartMusic();
@@ -20,10 +21,6 @@ const Transition transitions[] = {
   {State::Card, (uint8_t)Event::CardDetected, State::Music, StartMusic},
   {State::Music, (uint8_t)Event::MusicFinished, State::Card, StartCard},
 };
-
-
-
-
 
 static constexpr uint8_t TransitionsCount = sizeof(transitions) / sizeof(transitions[0]);
 static_assert(TransitionsCount > 0, "Transitions array cannot be empty");
@@ -45,10 +42,10 @@ static_assert(OperationsCount > 0, "Operations array cannot be empty");
 
 BuzzerMelody melodies[]
 {
-  //BuzzerMelody(BUZZER_PIN, Aha::melodyLength, Aha::melody),
- // BuzzerMelody(BUZZER_PIN, Pirates::melodyLength, Pirates::melody),
+  BuzzerMelody(BUZZER_PIN, Aha::melodyLength, Aha::melody),
+  BuzzerMelody(BUZZER_PIN, Pirates::melodyLength, Pirates::melody),
   BuzzerMelody(BUZZER_PIN, PinkPanther::melodyLength, PinkPanther::melody),
-  //BuzzerMelody(BUZZER_PIN, Godfather::melodyLength, Godfather::melody),
+  BuzzerMelody(BUZZER_PIN, Godfather::melodyLength, Godfather::melody),
 };
 
 // Автоматически вычисляем размер массива
@@ -62,12 +59,15 @@ LcdManager lcdManager(&lcd, operations, OperationsCount);
 // ============ Действия ============
 void StartMusic()
 {
+  lcdManager.ResetPwm();
+
   uint32_t cardsDetected;
   EEPROM.get(0, cardsDetected);
   cardsDetected = (cardsDetected == UINT32_MAX) ? 0 : cardsDetected + 1;
   EEPROM.put(0, cardsDetected);
 
   musicPlayer.Play();
+
 }
 
 void StartCard()
@@ -77,11 +77,13 @@ void StartCard()
 
 void setup()
 {
+  pinMode(BACKLIGHT_PIN, OUTPUT);
   pinMode(BUZZER_PIN, OUTPUT);
   pinMode(ISR_PIN, INPUT_PULLUP);
   lcdManager.Begin();
   ExtInt::ConfigInterrupt();
   ExtInt::EnableInterrupt();
+
 
   uint32_t tmp;
   EEPROM.get(0, tmp);
@@ -98,16 +100,12 @@ void loop()
   switch (currentState)
   {
     case State::Card:
-      //      uint32_t var;
-      //      EEPROM.get(0, var);
-      //      lcd.setCursor(0, 0);
-      //      lcd.print(var, 10);
-      //      delay(100);
+      lcdManager.UpdateIdle();
       break;
 
     case State::Music:
       musicPlayer.Loop();
-      lcdManager.Update();
+      lcdManager.UpdateLoading();
 
       if (!musicPlayer.IsActive())
       {
@@ -126,4 +124,4 @@ ISR(INT0_vect)
 {
   ExtInt::DisableInterrupt();
   stateMachine.TriggerEvent(Event::CardDetected);
-} 
+}

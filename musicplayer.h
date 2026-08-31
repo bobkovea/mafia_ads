@@ -5,7 +5,7 @@
 class MusicPlayer
 {
   public:
-  
+
     MusicPlayer(BuzzerMelody* melodies, uint8_t melodiesCount, uint8_t initialIndex) :
       mMelodies{ melodies},
       mMelodiesCount(melodiesCount),
@@ -43,7 +43,7 @@ class MusicPlayer
     {
       return &mMelodies[mCurrentMelodyIndex];
     }
- 
+
     BuzzerMelody* mMelodies;
     uint8_t mMelodiesCount;
     uint8_t mCurrentMelodyIndex;

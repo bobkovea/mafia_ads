@@ -2,6 +2,7 @@
 
 #define _LCD_TYPE 1  // для работы с I2C дисплеями
 #include <LCD_1602_RUS_ALL.h>
+#include <GTimer.h>
 
 // Структура операции
 struct Operation
@@ -15,7 +16,7 @@ class LcdManager
 {
   public:
     // Конструктор
-    LcdManager(LCD_1602_RUS* lcd, const Operation* operations, uint8_t count, uint8_t barLength = 16)
+    LcdManager(LCD_1602_RUS* lcd, const Operation* operations, uint8_t count, uint8_t barLength = 16, uint8_t backlightPin = 9)
     {
       _lcd = lcd;
       _operations = operations;
@@ -24,7 +25,7 @@ class LcdManager
       _currentOperationIndex = 0;
       _currentProgressBarIndex = 0;
       _needUpdateOperation = true;
-      _timer = 0;
+      _backlightPin = backlightPin;
     }
 
     // Инициализация
@@ -34,17 +35,52 @@ class LcdManager
       _lcd->backlight();
     }
 
-    // Обновление (вызывать в loop)
-    void Update()
+    void ResetPwm()
     {
-      if (millis() - _timer >= _operations[_currentOperationIndex].updatePeriodMs)
-      {
-        _timer = millis();
+      _pwmDirection = false;
+      _brightness = 255;
+      analogWrite(_backlightPin, _brightness);
+    }
 
+    void UpdateIdle()
+    {
+      EVERY_MS(_idlePwmPeriodMs)
+      {
+        analogWrite(_backlightPin, _brightness);
+
+        _brightness = _pwmDirection ? _brightness + _brightnessStep : _brightness - _brightnessStep;
+
+        if (_brightness >= 255)
+        {
+          _brightness = 255;
+          _pwmDirection = false;
+        }
+        else if (_brightness <= 0)
+        {
+          _brightness = 0;
+          _pwmDirection = true;
+        }
+      }
+
+      EVERY_MS(_idleTextPeriodMs)
+      {
+        _lcd->setCursor(0, 0);
+        _lcd->print("КОЛ-ВО ПОПЫТОК:");
+
+        uint32_t var;
+        EEPROM.get(0, var);
+        _lcd->setCursor(0, 1);
+        _lcd->print(var, 10);
+      }
+    }
+
+    void UpdateLoading()
+    {
+      EVERY_MS(_operations[_currentOperationIndex].updatePeriodMs)
+      {
         // Вывод операции при необходимости
         if (_needUpdateOperation)
         {
-           //Clear();
           _lcd->setCursor(0, 1);
           _lcd->print("                ");
           _lcd->setCursor(0, 0);
@@ -74,6 +110,13 @@ class LcdManager
     uint8_t _currentOperationIndex;
     uint8_t _currentProgressBarIndex;
     bool _needUpdateOperation;
-    uint32_t _timer;
     uint8_t _barLength;
+    uint8_t _backlightPin;
+
+
+    int16_t _brightness = 255;
+    int16_t _brightnessStep = 5;
+    bool _pwmDirection = false;
+    static constexpr uint32_t _idlePwmPeriodMs = 50;
+    static constexpr uint32_t _idleTextPeriodMs = 1000;
 };
