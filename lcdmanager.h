@@ -35,6 +35,14 @@ class LcdManager
       _lcd->backlight();
     }
 
+    void ClearDisplay()
+    {
+      _lcd->setCursor(0, 0);
+      _lcd->print("                ");
+      _lcd->setCursor(0, 1);
+      _lcd->print("                ");
+    }
+    
     void ResetPwm()
     {
       _pwmDirection = false;

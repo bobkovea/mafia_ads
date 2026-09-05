@@ -7,6 +7,7 @@
 #include "melodies/pinkpanther.h"
 #include "melodies/pirates.h"
 #include "melodies/aha.h"
+#include "melodies/doorbeep.h"
 
 #define ISR_PIN 2
 #define BUZZER_PIN 3
@@ -40,12 +41,14 @@ static constexpr Operation operations[] =
 static constexpr uint8_t OperationsCount = sizeof(operations) / sizeof(operations[0]);
 static_assert(OperationsCount > 0, "Operations array cannot be empty");
 
+BuzzerMelody beep = BuzzerMelody(BUZZER_PIN, DoorBeep::melodyLength, DoorBeep::melody);
+
 BuzzerMelody melodies[]
 {
   BuzzerMelody(BUZZER_PIN, Aha::melodyLength, Aha::melody),
-  BuzzerMelody(BUZZER_PIN, Pirates::melodyLength, Pirates::melody),
-  BuzzerMelody(BUZZER_PIN, PinkPanther::melodyLength, PinkPanther::melody),
-  BuzzerMelody(BUZZER_PIN, Godfather::melodyLength, Godfather::melody),
+//  BuzzerMelody(BUZZER_PIN, Pirates::melodyLength, Pirates::melody),
+//  BuzzerMelody(BUZZER_PIN, PinkPanther::melodyLength, PinkPanther::melody),
+//  BuzzerMelody(BUZZER_PIN, Godfather::melodyLength, Godfather::melody),
 };
 
 // Автоматически вычисляем размер массива
@@ -60,18 +63,22 @@ LcdManager lcdManager(&lcd, operations, OperationsCount);
 void StartMusic()
 {
   lcdManager.ResetPwm();
-
   uint32_t cardsDetected;
   EEPROM.get(0, cardsDetected);
   cardsDetected = (cardsDetected == UINT32_MAX) ? 0 : cardsDetected + 1;
   EEPROM.put(0, cardsDetected);
 
-  musicPlayer.Play();
+  beep.play();
 
+  do
+  {
+    beep.loop();
+  } while (beep.getState() != BuzzerMelody::IDLE);
 }
 
 void StartCard()
 {
+  lcdManager.ClearDisplay();
   ExtInt::EnableInterrupt();
 }
 
@@ -104,14 +111,15 @@ void loop()
       break;
 
     case State::Music:
-      musicPlayer.Loop();
+      
+      //musicPlayer.Loop();
       lcdManager.UpdateLoading();
 
-      if (!musicPlayer.IsActive())
-      {
-        musicPlayer.ChangeMelody();
-        stateMachine.TriggerEvent(Event::MusicFinished);
-      }
+      //if (!musicPlayer.IsActive())
+      //{
+      //  musicPlayer.ChangeMelody();
+      //  stateMachine.TriggerEvent(Event::MusicFinished);
+      //}
       break;
 
     default:

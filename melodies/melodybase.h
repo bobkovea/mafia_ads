@@ -16,6 +16,7 @@ struct Duration
   static constexpr uint16_t DE = E + S;
   static constexpr uint16_t DQ = Q + E;
   static constexpr uint16_t DH = H + Q;
-};
+  
+};  
 
 #define CreateNote(pitch, duration, baseTime) { NOTE_##pitch, Duration<baseTime>::duration }
