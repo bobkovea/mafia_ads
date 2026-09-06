@@ -33,10 +33,9 @@ StateMachine stateMachine(transitions, TransitionsCount, State::Card);
 
 static constexpr Operation operations[] =
 { //"XXXXXXXXXXXXXXXX"
-  { "ПOИCK В БАЗЕ... " },
-  { "СЪЕМ ПАТТЕРНА..." },
-  { "РАСЧЕТ МОДЕЛИ..." },
-  { "ПОДБОР РОЛИ...  " },
+  { "Поиск в базе... " },
+  { "Расчет модели..." },
+  { "Подбор роли...  " }
 };
 
 // Автоматически вычисляем размер массива
@@ -48,9 +47,9 @@ BuzzerMelody beep = BuzzerMelody(BUZZER_PIN, DoorBeep::melodyLength, DoorBeep::m
 BuzzerMelody melodies[]
 {
   BuzzerMelody(BUZZER_PIN, Aha::melodyLength, Aha::melody),
-  //  BuzzerMelody(BUZZER_PIN, Pirates::melodyLength, Pirates::melody),
-  //  BuzzerMelody(BUZZER_PIN, PinkPanther::melodyLength, PinkPanther::melody),
-  //  BuzzerMelody(BUZZER_PIN, Godfather::melodyLength, Godfather::melody),
+  BuzzerMelody(BUZZER_PIN, Pirates::melodyLength, Pirates::melody),
+  BuzzerMelody(BUZZER_PIN, PinkPanther::melodyLength, PinkPanther::melody),
+  BuzzerMelody(BUZZER_PIN, Godfather::melodyLength, Godfather::melody),
 };
 
 // Автоматически вычисляем размер массива
@@ -60,10 +59,13 @@ static_assert(MelodiesCount > 0, "Melodies array cannot be empty");
 MusicPlayer musicPlayer(melodies, MelodiesCount, 0);
 LCD_1602_RUS lcd(0x27, 16, 2);
 LcdManager lcdManager(&lcd, operations, OperationsCount);
+MafiaRole role;
 
 // ============ Действия ============
 void StartLoading()
 {
+  role = MafiaRole::Sheriff;
+  
   beep.play();
 
   do
@@ -84,8 +86,13 @@ void StartLoading()
 void StartEnding()
 {
    musicPlayer.Play();
-  //  const MafiaRole role = GetRole();
-  //  lcdManager.SetEnding(role);
+   
+   lcdManager.PrintCityFallingAsleep();
+   while(!lcdManager.SmoothBacklightOff());
+   lcdManager.ClearDisplay();
+   delay(2000);
+   lcdManager.SetEnding(role);
+   while(!lcdManager.SmoothBacklightOn());
 }
 
 void StartCard()

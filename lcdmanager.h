@@ -4,7 +4,6 @@
 #include <LCD_1602_RUS_ALL.h>
 #include <GTimer.h>
 
-// Структура операции
 struct Operation
 {
   const char* msg;
@@ -18,12 +17,6 @@ enum class MafiaRole : uint8_t
   Don = 3
 };
 
-struct Ending
-{
-
-};
-
-// Класс для управления LCD с прогресс-баром
 class LcdManager
 {
   public:
@@ -58,22 +51,64 @@ class LcdManager
       analogWrite(_backlightPin, _brightness);
     }
 
+    void PrintCityFallingAsleep()
+    {
+      _lcd->setCursor(0, 0);
+      _lcd->print({"   Город        "});
+      _lcd->setCursor(0, 1);
+      _lcd->print({"   засыпает...  "});
+    }
+
+    bool SmoothBacklightOff()
+    {
+      EVERY_MS(_idlePwmPeriodMs)
+      {
+        analogWrite(_backlightPin, getBrightCRT(_brightness));
+
+        _brightness -= _brightnessStep;
+
+        if (_brightness < _minBrightness)
+        {
+          _brightness = _minBrightness;
+        }
+      }
+      return _brightness == _minBrightness;
+    }
+
+    bool SmoothBacklightOn()
+    {
+      EVERY_MS(_idlePwmPeriodMs)
+      {
+        analogWrite(_backlightPin, getBrightCRT(_brightness));
+
+        _brightness += _brightnessStep;
+
+        if (_brightness > _maxBrightness)
+        {
+          _brightness = _maxBrightness;
+        }
+      }
+      return _brightness == _maxBrightness;
+    }
+
+
+
     void UpdateIdle()
     {
       EVERY_MS(_idlePwmPeriodMs)
       {
-        analogWrite(_backlightPin, _brightness);
+        analogWrite(_backlightPin, getBrightCRT(_brightness));
 
         _brightness = _pwmDirection ? _brightness + _brightnessStep : _brightness - _brightnessStep;
 
-        if (_brightness >= 255)
+        if (_brightness >= _maxBrightness)
         {
-          _brightness = 255;
+          _brightness = _maxBrightness;
           _pwmDirection = false;
         }
-        else if (_brightness <= 0)
+        else if (_brightness <= _minBrightness)
         {
-          _brightness = 0;
+          _brightness = _minBrightness;
           _pwmDirection = true;
         }
       }
@@ -136,13 +171,14 @@ class LcdManager
     bool UpdateLoading()
     {
       static uint32_t period = 100;
+      bool loadingIsFinished = false;
 
       EVERY_MS(period)
       {
         // period = (uint32_t)random(50, 100); //TBD
 
-        const bool loadingIsFinished = IsLoadingFinished(); 
-        
+        loadingIsFinished = IsLoadingFinished();
+
         if (loadingIsFinished)
         {
           ResetOperations();
@@ -160,48 +196,46 @@ class LcdManager
             UpdateProgressBar();
           }
         }
-
-        return loadingIsFinished;
       }
+      return loadingIsFinished;
     }
-    /*
-        void SetEnding(const MafiaRole role)
-        {
-          _currentEnding = role;
-        }
 
-        void UpdateEnding()
-        {
-          const char* endingMsg = "";
-          switch (_currentEnding)
-          {
-            case MafiaRole::Citizen:
-              endingMsg = "Citizens Win!";
-              break;
-            case MafiaRole::Sheriff:
-              endingMsg = "Sheriff Wins!";
-              break;
-            case MafiaRole::Mafia:
-              endingMsg = "Sheriff Wins!";
-              break;
-            case MafiaRole::Don:
-              endingMsg = "Don Wins!";
-              break;
+    void SetEnding(const MafiaRole role)
+    {
+      const char* endingMsg = "";
+      switch (role)
+      {
+        case MafiaRole::Citizen:
+          endingMsg = "МИРНЫЙ ЖИТЕЛЬ !";
+          break;
+        case MafiaRole::Sheriff:
+          endingMsg = "     ШЕРИФ!     ";
+          break;
+        case MafiaRole::Mafia:
+          endingMsg = "     МАФИЯ!    ";
+          break;
+        case MafiaRole::Don:
+          endingMsg = "   ДОН МАФИИ!   ";
+          break;
 
-            default:
-              break;
-          }
+        default:
+          break;
+      }
 
-          EVERY_MS(1000)
-          {
-            static uint8_t i = 0;
-            _lcd->setCursor(i++, 0);
-            _lcd->print(endingMsg);
-          }
-        }
-    */
+      _lcd->setCursor(0, 0);
+      _lcd->print({"Ваша роль:"     });
+
+      _lcd->setCursor(0, 1);
+      _lcd->print(endingMsg);
+    }
 
   private:
+
+    uint8_t getBrightCRT(uint8_t val)
+    {
+      return (uint32_t(val + 1) * (val + 1) * val) >> 16;
+    }
+
     LCD_1602_RUS* _lcd;
     const Operation* _operations;
     uint8_t _operationsCount;
@@ -211,10 +245,10 @@ class LcdManager
     uint8_t _backlightPin;
 
     int16_t _brightness = 255;
-    int16_t _brightnessStep = 5;
+    int16_t _brightnessStep = 1;
     bool _pwmDirection = false;
-    static constexpr uint32_t _idlePwmPeriodMs = 50;
+    static constexpr uint32_t _idlePwmPeriodMs = 20;
     static constexpr uint32_t _idleTextPeriodMs = 1000;
-
-    //MafiaRole _currentEnding = MafiaRole::Citizen;
+    static constexpr uint8_t _maxBrightness = 255;
+    static constexpr uint8_t _minBrightness = 25;
 };
