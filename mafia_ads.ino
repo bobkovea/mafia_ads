@@ -63,9 +63,7 @@ MafiaRole role;
 
 // ============ Действия ============
 void StartLoading()
-{
-  role = MafiaRole::Sheriff;
-  
+{  
   beep.play();
 
   do
@@ -81,11 +79,13 @@ void StartLoading()
   lcdManager.ResetPwm();
   lcdManager.ClearDisplay();
   lcdManager.UpdateOperation();
+
+  role = GetRole();
 }
 
 void StartEnding()
 {
-   musicPlayer.Play();
+   melodies[(uint8_t)role].play();
    
    lcdManager.PrintCityFallingAsleep();
    while(!lcdManager.SmoothBacklightOff());
@@ -108,6 +108,7 @@ MafiaRole GetRole()
 
 void setup()
 {
+  randomSeed(analogRead(0));
   pinMode(BACKLIGHT_PIN, OUTPUT);
   pinMode(BUZZER_PIN, OUTPUT);
   pinMode(ISR_PIN, INPUT_PULLUP);
@@ -143,13 +144,12 @@ void loop()
 
     case State::Ending:
       //lcdManager.UpdateEnding();
-
-      musicPlayer.Loop();
-      if (!musicPlayer.IsActive())
+      melodies[(uint8_t)role].loop();
+      if (melodies[(uint8_t)role].getState() == BuzzerMelody::IDLE)
       {
-        musicPlayer.ChangeMelody();
         stateMachine.TriggerEvent(Event::EndingFinished);
       }
+
       break;
 
     default:
