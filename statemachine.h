@@ -87,5 +87,4 @@ class StateMachine
     uint8_t mTransitionsCount;
     volatile State mCurrentState;
     volatile uint8_t mEvents;
-
 };

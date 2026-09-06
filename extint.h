@@ -1,5 +1,7 @@
 #pragma once
 
+#include <avr/interrupt.h>
+
 class ExtInt
 {
   public:
