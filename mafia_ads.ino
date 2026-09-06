@@ -24,7 +24,7 @@ BuzzerMelody melodies[]
   BuzzerMelody(BuzzerPin, Godfather::melodyLength, Godfather::melody),
 };
 
-LCD_1602_RUS lcd(0x27, 16, 2);
+LCD_1602_RUS lcd(LcdI2cAddress, LcdColsCount, LcdRowsCount);
 LcdManager lcdManager(&lcd, operations, OperationsCount, BacklightPin);
 RoleManager roleManager;
 

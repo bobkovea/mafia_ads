@@ -5,6 +5,9 @@
 static constexpr uint8_t IsrPin = 2;
 static constexpr uint8_t BuzzerPin = 3;
 static constexpr uint8_t BacklightPin = 9;
+static constexpr uint8_t LcdI2cAddress = 0x27;
+static constexpr uint8_t LcdRowsCount = 2;
+static constexpr uint8_t LcdColsCount = 0x27;
 
 static constexpr Operation operations[] =
 { //"XXXXXXXXXXXXXXXX"
