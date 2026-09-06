@@ -14,13 +14,15 @@
 #define BACKLIGHT_PIN 9
 
 // ============ Прототипы действий ============
-void StartMusic();
+void StartLoading();
+void StartEnding();
 void StartCard();
 
 // ============ Таблица переходов ============
 const Transition transitions[] = {
-  {State::Card, (uint8_t)Event::CardDetected, State::Music, StartMusic},
-  {State::Music, (uint8_t)Event::MusicFinished, State::Card, StartCard},
+  { State::Card, (uint8_t)Event::CardDetected, State::Loading, StartLoading },
+  { State::Loading, (uint8_t)Event::LoadingFinished, State::Ending, StartEnding },
+  { State::Ending, (uint8_t)Event::EndingFinished, State::Card, StartCard },
 };
 
 static constexpr uint8_t TransitionsCount = sizeof(transitions) / sizeof(transitions[0]);
@@ -31,10 +33,10 @@ StateMachine stateMachine(transitions, TransitionsCount, State::Card);
 
 static constexpr Operation operations[] =
 { //"XXXXXXXXXXXXXXXX"
-  { "ПOИCK В БАЗЕ... ", 100},
-  { "СЪЕМ ПАТТЕРНА...", 100},
-  { "РАСЧЕТ МОДЕЛИ...", 100},
-  { "ПОДБОР РОЛИ...  ", 100},
+  { "ПOИCK В БАЗЕ... " },
+  { "СЪЕМ ПАТТЕРНА..." },
+  { "РАСЧЕТ МОДЕЛИ..." },
+  { "ПОДБОР РОЛИ...  " },
 };
 
 // Автоматически вычисляем размер массива
@@ -46,9 +48,9 @@ BuzzerMelody beep = BuzzerMelody(BUZZER_PIN, DoorBeep::melodyLength, DoorBeep::m
 BuzzerMelody melodies[]
 {
   BuzzerMelody(BUZZER_PIN, Aha::melodyLength, Aha::melody),
-//  BuzzerMelody(BUZZER_PIN, Pirates::melodyLength, Pirates::melody),
-//  BuzzerMelody(BUZZER_PIN, PinkPanther::melodyLength, PinkPanther::melody),
-//  BuzzerMelody(BUZZER_PIN, Godfather::melodyLength, Godfather::melody),
+  //  BuzzerMelody(BUZZER_PIN, Pirates::melodyLength, Pirates::melody),
+  //  BuzzerMelody(BUZZER_PIN, PinkPanther::melodyLength, PinkPanther::melody),
+  //  BuzzerMelody(BUZZER_PIN, Godfather::melodyLength, Godfather::melody),
 };
 
 // Автоматически вычисляем размер массива
@@ -60,26 +62,41 @@ LCD_1602_RUS lcd(0x27, 16, 2);
 LcdManager lcdManager(&lcd, operations, OperationsCount);
 
 // ============ Действия ============
-void StartMusic()
+void StartLoading()
 {
-  lcdManager.ResetPwm();
-  uint32_t cardsDetected;
-  EEPROM.get(0, cardsDetected);
-  cardsDetected = (cardsDetected == UINT32_MAX) ? 0 : cardsDetected + 1;
-  EEPROM.put(0, cardsDetected);
-
   beep.play();
 
   do
   {
     beep.loop();
   } while (beep.getState() != BuzzerMelody::IDLE);
+
+  uint32_t cardsDetected;
+  EEPROM.get(0, cardsDetected);
+  cardsDetected = (cardsDetected == UINT32_MAX) ? 0 : cardsDetected + 1;
+  EEPROM.put(0, cardsDetected);
+
+  lcdManager.ResetPwm();
+  lcdManager.ClearDisplay();
+  lcdManager.UpdateOperation();
+}
+
+void StartEnding()
+{
+   musicPlayer.Play();
+  //  const MafiaRole role = GetRole();
+  //  lcdManager.SetEnding(role);
 }
 
 void StartCard()
 {
   lcdManager.ClearDisplay();
   ExtInt::EnableInterrupt();
+}
+
+MafiaRole GetRole()
+{
+  return (MafiaRole)random(4);
 }
 
 void setup()
@@ -91,12 +108,11 @@ void setup()
   ExtInt::ConfigInterrupt();
   ExtInt::EnableInterrupt();
 
-
   uint32_t tmp;
   EEPROM.get(0, tmp);
   if (tmp == UINT32_MAX)
   {
-    EEPROM.put(0, tmp);
+    EEPROM.put(0, (uint32_t)0);
   }
 }
 
@@ -110,16 +126,23 @@ void loop()
       lcdManager.UpdateIdle();
       break;
 
-    case State::Music:
-      
-      //musicPlayer.Loop();
-      lcdManager.UpdateLoading();
+    case State::Loading:
+      if (lcdManager.UpdateLoading())
+      {
+        stateMachine.TriggerEvent(Event::LoadingFinished);
+      }
 
-      //if (!musicPlayer.IsActive())
-      //{
-      //  musicPlayer.ChangeMelody();
-      //  stateMachine.TriggerEvent(Event::MusicFinished);
-      //}
+      break;
+
+    case State::Ending:
+      //lcdManager.UpdateEnding();
+
+      musicPlayer.Loop();
+      if (!musicPlayer.IsActive())
+      {
+        musicPlayer.ChangeMelody();
+        stateMachine.TriggerEvent(Event::EndingFinished);
+      }
       break;
 
     default:

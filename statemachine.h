@@ -6,7 +6,8 @@
 enum class State : uint8_t
 {
   Card,
-  Music
+  Loading,
+  Ending
 };
 
 // ============ События ============
@@ -14,7 +15,8 @@ enum class Event : uint8_t
 {
   None = 0x00,
   CardDetected = 0x01,
-  MusicFinished = 0x02
+  LoadingFinished = 0x02,
+  EndingFinished = 0x04
 };
 
 // ============ Прототип действия ============
