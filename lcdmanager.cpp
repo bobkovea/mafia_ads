@@ -3,10 +3,10 @@
 #include <GTimer.h>
 #include "nvmanager.h"
 
-LcdManager::LcdManager(LCD_1602_RUS* lcd, const Operation* operations, uint8_t count, uint8_t backlightPin) :
+LcdManager::LcdManager(LCD_1602_RUS* lcd, const char** loadingMessages, uint8_t loadingMessagesCount, uint8_t backlightPin) :
   _lcd(lcd),
-  _operations(operations),
-  _operationsCount(count),
+  _loadingMessages(loadingMessages),
+  _loadingMessagesCount(loadingMessagesCount),
   _backlightPin(backlightPin)
 {
 }
@@ -102,16 +102,16 @@ void LcdManager::UpdateIdle()
   }
 }
 
-void LcdManager::UpdateOperation()
+void LcdManager::UpdateLoadingMessage()
 {
   _lcd->setCursor(0, 0);
-  _lcd->print(_operations[_currentOperationIndex].msg);
-  ++_currentOperationIndex;
+  _lcd->print(_loadingMessages[_currentLoadingMessageIndex]);
+  ++_currentLoadingMessageIndex;
 }
 
 bool LcdManager::IsLoadingFinished()
 {
-  return (_currentOperationIndex == _operationsCount) && (_currentProgressBarIndex == BarLength);
+  return (_currentLoadingMessageIndex == _loadingMessagesCount) && (_currentProgressBarIndex == BarLength);
 }
 
 bool LcdManager::IsProgressBarFull()
@@ -133,9 +133,9 @@ void LcdManager::ResetProgressBar()
   _lcd->print("                ");
 }
 
-void LcdManager::ResetOperations()
+void LcdManager::ResetLoadingMessages()
 {
-  _currentOperationIndex = 0;
+  _currentLoadingMessageIndex = 0;
   _lcd->setCursor(0, 0);
   _lcd->print("                ");
 }
@@ -153,7 +153,7 @@ bool LcdManager::UpdateLoading()
 
     if (loadingIsFinished)
     {
-      ResetOperations();
+      ResetLoadingMessages();
       ResetProgressBar();
     }
     else
@@ -161,7 +161,7 @@ bool LcdManager::UpdateLoading()
       if (IsProgressBarFull())
       {
         ResetProgressBar();
-        UpdateOperation();
+        UpdateLoadingMessage();
       }
       else
       {

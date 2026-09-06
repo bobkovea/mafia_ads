@@ -25,7 +25,7 @@ BuzzerMelody melodies[]
 };
 
 LCD_1602_RUS lcd(LcdI2cAddress, LcdColsCount, LcdRowsCount);
-LcdManager lcdManager(&lcd, operations, OperationsCount, BacklightPin);
+LcdManager lcdManager(&lcd, loadingMessages, LoadingMessagesCount, BacklightPin);
 RoleManager roleManager;
 
 // ============ Действия ============
@@ -42,7 +42,7 @@ void StartLoading()
 
   lcdManager.ResetPwm();
   lcdManager.ClearDisplay();
-  lcdManager.UpdateOperation();
+  lcdManager.UpdateLoadingMessage();
 
   roleManager.GenerateRole();
 }

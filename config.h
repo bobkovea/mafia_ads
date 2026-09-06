@@ -9,16 +9,16 @@ static constexpr uint8_t LcdI2cAddress = 0x27;
 static constexpr uint8_t LcdRowsCount = 2;
 static constexpr uint8_t LcdColsCount = 0x27;
 
-static constexpr Operation operations[] =
-{ //"XXXXXXXXXXXXXXXX"
-  { "Поиск в базе... " },
-  { "Расчет модели..." },
-  { "Подбор роли...  " }
+static const char* loadingMessages[] =
+{
+  "Поиск в базе... ",
+  "Расчет модели...",
+  "Подбор роли...  "
 };
 
 // Автоматически вычисляем размер массива
-static constexpr uint8_t OperationsCount = sizeof(operations) / sizeof(operations[0]);
-static_assert(OperationsCount > 0, "Operations array cannot be empty");
+static constexpr uint8_t LoadingMessagesCount = sizeof(loadingMessages) / sizeof(loadingMessages[0]);
+static_assert(LoadingMessagesCount > 0, "Operations array cannot be empty");
 
 // ============ Прототипы действий ============
 void StartLoading();
