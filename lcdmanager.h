@@ -3,6 +3,7 @@
 #define _LCD_TYPE 1  // для работы с I2C дисплеями
 #include <LCD_1602_RUS_ALL.h>
 #include <GTimer.h>
+#include "nvmanager.h"
 
 struct Operation
 {
@@ -118,10 +119,9 @@ class LcdManager
         _lcd->setCursor(0, 0);
         _lcd->print("КОЛ-ВО ПОПЫТОК:");
 
-        uint32_t var;
-        EEPROM.get(0, var);
+        const uint32_t attempts = NvManager::GetAttempts();
         _lcd->setCursor(0, 1);
-        _lcd->print(var, 10);
+        _lcd->print(attempts, 10);
       }
     }
 

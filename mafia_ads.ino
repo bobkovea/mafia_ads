@@ -1,4 +1,3 @@
-#include <EEPROM.h>
 #include "musicplayer.h"
 #include "extint.h"
 #include "lcdmanager.h"
@@ -8,6 +7,7 @@
 #include "melodies/pirates.h"
 #include "melodies/aha.h"
 #include "melodies/doorbeep.h"
+#include "nvmanager.h"
 
 #define ISR_PIN 2
 #define BUZZER_PIN 3
@@ -71,10 +71,7 @@ void StartLoading()
     beep.loop();
   } while (beep.getState() != BuzzerMelody::IDLE);
 
-  uint32_t cardsDetected;
-  EEPROM.get(0, cardsDetected);
-  cardsDetected = (cardsDetected == UINT32_MAX) ? 0 : cardsDetected + 1;
-  EEPROM.put(0, cardsDetected);
+  NvManager::IncrementAttempts();
 
   lcdManager.ResetPwm();
   lcdManager.ClearDisplay();
@@ -116,12 +113,8 @@ void setup()
   ExtInt::ConfigInterrupt();
   ExtInt::EnableInterrupt();
 
-  uint32_t tmp;
-  EEPROM.get(0, tmp);
-  if (tmp == UINT32_MAX)
-  {
-    EEPROM.put(0, (uint32_t)0);
-  }
+  NvManager::Initialize();
+
 }
 
 void loop()
