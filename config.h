@@ -11,7 +11,7 @@ static constexpr uint8_t LcdColsCount = 16;
 
 static const char* loadingMessages[] =
 {
-  "Поиск в базе... ",
+  "Скан ID ключа...",
   "Расчет модели...",
   "Подбор роли...  "
 };

@@ -5,15 +5,15 @@
 #include "rolemanager.h"
 #include "config.h"
 #include "musicplayer.h"
+#include "pwmmanager.h"
 
 StateMachine stateMachine(transitions, TransitionsCount, State::Card);
-
 LCD_1602_RUS lcd(LcdI2cAddress, LcdColsCount, LcdRowsCount);
-LcdManager lcdManager(&lcd, loadingMessages, LoadingMessagesCount, BacklightPin);
+LcdManager lcdManager(&lcd, loadingMessages, LoadingMessagesCount);
 RoleManager roleManager;
 MusicPlayer<BuzzerPin> musicPlayer;
+PwmManager<BacklightPin> pwmManager;
 
-// ============ Действия ============
 void StartLoading()
 {
   musicPlayer.PlayBeep();
@@ -25,7 +25,7 @@ void StartLoading()
 
   NvManager::IncrementAttempts();
 
-  lcdManager.ResetPwm();
+  pwmManager.ResetPwm();
   lcdManager.ClearDisplay();
   lcdManager.UpdateLoadingMessage();
 
@@ -37,11 +37,11 @@ void StartEnding()
   const MafiaRole role = roleManager.GetRole();
   musicPlayer.PlayRole(role);
   lcdManager.PrintCityFallingAsleep();
-  while (!lcdManager.SmoothBacklightOff());
+  while (!pwmManager.SmoothBacklightOff());
   lcdManager.ClearDisplay();
   delay(2000);
   lcdManager.SetEnding(role);
-  while (!lcdManager.SmoothBacklightOn());
+  while (!pwmManager.SmoothBacklightOn());
 }
 
 void StartCard()
@@ -69,7 +69,8 @@ void loop()
   switch (currentState)
   {
     case State::Card:
-      lcdManager.UpdateIdle();
+      pwmManager.Breath();
+      lcdManager.UpdateAttemptsMessage();
       break;
 
     case State::Loading:
@@ -80,7 +81,7 @@ void loop()
       break;
     
     case State::Ending:
-      //lcdManager.UpdateEnding();
+
       musicPlayer.Loop();
       if (musicPlayer.IsFinished())
       {

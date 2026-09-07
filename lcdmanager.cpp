@@ -3,13 +3,13 @@
 #include <GTimer.h>
 #include "nvmanager.h"
 
-LcdManager::LcdManager(LCD_1602_RUS* lcd, const char** loadingMessages, uint8_t loadingMessagesCount, uint8_t backlightPin) :
+LcdManager::LcdManager(LCD_1602_RUS* lcd, const char** loadingMessages, uint8_t loadingMessagesCount) :
   _lcd(lcd),
   _loadingMessages(loadingMessages),
-  _loadingMessagesCount(loadingMessagesCount),
-  _backlightPin(backlightPin)
+  _loadingMessagesCount(loadingMessagesCount)
 {
 }
+
 void LcdManager::Begin()
 {
   _lcd->init();
@@ -24,13 +24,6 @@ void LcdManager::ClearDisplay()
   _lcd->print("                ");
 }
 
-void LcdManager::ResetPwm()
-{
-  _pwmDirection = false;
-  _brightness = 255;
-  analogWrite(_backlightPin, _brightness);
-}
-
 void LcdManager::PrintCityFallingAsleep()
 {
   _lcd->setCursor(0, 0);
@@ -39,58 +32,8 @@ void LcdManager::PrintCityFallingAsleep()
   _lcd->print({"   засыпает...  "});
 }
 
-bool LcdManager::SmoothBacklightOff()
+void LcdManager::UpdateAttemptsMessage()
 {
-  EVERY_MS(_idlePwmPeriodMs)
-  {
-    analogWrite(_backlightPin, GetBrightCRT(_brightness));
-
-    _brightness -= _brightnessStep;
-
-    if (_brightness < _minBrightness)
-    {
-      _brightness = _minBrightness;
-    }
-  }
-  return _brightness == _minBrightness;
-}
-
-bool LcdManager::SmoothBacklightOn()
-{
-  EVERY_MS(_idlePwmPeriodMs)
-  {
-    analogWrite(_backlightPin, GetBrightCRT(_brightness));
-
-    _brightness += _brightnessStep;
-
-    if (_brightness > _maxBrightness)
-    {
-      _brightness = _maxBrightness;
-    }
-  }
-  return _brightness == _maxBrightness;
-}
-
-void LcdManager::UpdateIdle()
-{
-  EVERY_MS(_idlePwmPeriodMs)
-  {
-    analogWrite(_backlightPin, GetBrightCRT(_brightness));
-
-    _brightness = _pwmDirection ? _brightness + _brightnessStep : _brightness - _brightnessStep;
-
-    if (_brightness >= _maxBrightness)
-    {
-      _brightness = _maxBrightness;
-      _pwmDirection = false;
-    }
-    else if (_brightness <= _minBrightness)
-    {
-      _brightness = _minBrightness;
-      _pwmDirection = true;
-    }
-  }
-
   EVERY_MS(_idleTextPeriodMs)
   {
     _lcd->setCursor(0, 0);
@@ -199,9 +142,4 @@ void LcdManager::SetEnding(const MafiaRole role)
 
   _lcd->setCursor(0, 1);
   _lcd->print(endingMsg);
-}
-
-uint8_t LcdManager::GetBrightCRT(uint8_t val)
-{
-  return (uint32_t(val + 1) * (val + 1) * val) >> 16;
 }
