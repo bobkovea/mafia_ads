@@ -1,42 +1,27 @@
 #include "extint.h"
 #include "lcdmanager.h"
 #include "statemachine.h"
-#include "melodies/godfather.h"
-#include "melodies/pinkpanther.h"
-#include "melodies/pirates.h"
-#include "melodies/aha.h"
-#include "melodies/doorbeep.h"
 #include "nvmanager.h"
-#include "BuzzerMelody.h"
 #include "rolemanager.h"
 #include "config.h"
+#include "musicplayer.h"
 
-// ============ Глобальные переменные ============
 StateMachine stateMachine(transitions, TransitionsCount, State::Card);
-
-BuzzerMelody beep = BuzzerMelody(BuzzerPin, DoorBeep::melodyLength, DoorBeep::melody);
-
-BuzzerMelody melodies[]
-{
-  BuzzerMelody(BuzzerPin, Aha::melodyLength, Aha::melody),
-  BuzzerMelody(BuzzerPin, Pirates::melodyLength, Pirates::melody),
-  BuzzerMelody(BuzzerPin, PinkPanther::melodyLength, PinkPanther::melody),
-  BuzzerMelody(BuzzerPin, Godfather::melodyLength, Godfather::melody),
-};
 
 LCD_1602_RUS lcd(LcdI2cAddress, LcdColsCount, LcdRowsCount);
 LcdManager lcdManager(&lcd, loadingMessages, LoadingMessagesCount, BacklightPin);
 RoleManager roleManager;
+MusicPlayer<BuzzerPin> musicPlayer;
 
 // ============ Действия ============
 void StartLoading()
 {
-  beep.play();
-
+  musicPlayer.PlayBeep();
+  
   do
   {
-    beep.loop();
-  } while (beep.getState() != BuzzerMelody::IDLE);
+    musicPlayer.Loop();
+  } while (!musicPlayer.IsFinished());
 
   NvManager::IncrementAttempts();
 
@@ -49,14 +34,13 @@ void StartLoading()
 
 void StartEnding()
 {
-  const uint8_t roleNumber = (uint8_t)roleManager.GetRole();
-  melodies[roleNumber].play();
-
+  const MafiaRole role = roleManager.GetRole();
+  musicPlayer.PlayRole(role);
   lcdManager.PrintCityFallingAsleep();
   while (!lcdManager.SmoothBacklightOff());
   lcdManager.ClearDisplay();
   delay(2000);
-  lcdManager.SetEnding((MafiaRole)roleNumber);
+  lcdManager.SetEnding(role);
   while (!lcdManager.SmoothBacklightOn());
 }
 
@@ -93,18 +77,15 @@ void loop()
       {
         stateMachine.TriggerEvent(Event::LoadingFinished);
       }
-
       break;
-
+    
     case State::Ending:
       //lcdManager.UpdateEnding();
-      const uint8_t roleNumber = (uint8_t)roleManager.GetRole();
-      melodies[roleNumber].loop();
-      if (melodies[roleNumber].getState() == BuzzerMelody::IDLE)
+      musicPlayer.Loop();
+      if (musicPlayer.IsFinished())
       {
         stateMachine.TriggerEvent(Event::EndingFinished);
       }
-
       break;
 
     default:

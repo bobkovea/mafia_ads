@@ -7,9 +7,7 @@
 class LcdManager
 {
   public:
-    // Конструктор
     LcdManager(LCD_1602_RUS* lcd, const char** loadingMessages, uint8_t loadingMessagesCount, uint8_t backlightPin);
-    // Инициализация
     void Begin();
     void ClearDisplay();
     void ResetPwm();
@@ -17,7 +15,6 @@ class LcdManager
     void PrintCityFallingAsleep();
     bool SmoothBacklightOff();
     bool SmoothBacklightOn();
-
     void UpdateIdle();
     bool UpdateLoading();
     void SetEnding(const MafiaRole role);

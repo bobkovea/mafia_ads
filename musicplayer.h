@@ -1,50 +1,65 @@
 #pragma once
 
 #include <BuzzerMelody.h>
+#include "melodies/godfather.h"
+#include "melodies/pinkpanther.h"
+#include "melodies/pirates.h"
+#include "melodies/aha.h"
+#include "melodies/doorbeep.h"
+#include "rolemanager.h"
 
+template <uint8_t buzzerPin>
 class MusicPlayer
 {
   public:
 
-    MusicPlayer(BuzzerMelody* melodies, uint8_t melodiesCount, uint8_t initialIndex) :
-      mMelodies{ melodies},
-      mMelodiesCount(melodiesCount),
-      mCurrentMelodyIndex(initialIndex)
+    void PlayBeep()
     {
+      _currentMelody = &_beep;
+      _currentMelody->play();
     }
 
-    void ChangeMelody()
+    void PlayRole(const MafiaRole role)
     {
-      mCurrentMelodyIndex = (mCurrentMelodyIndex < (mMelodiesCount - 1)) ? mCurrentMelodyIndex + 1 : 0;
-    }
+      switch (role)
+      {
+        case MafiaRole::Citizen:
+          _currentMelody = &_citizen;
+          break;
+        case MafiaRole::Sheriff:
+          _currentMelody = &_sheriff;
+          break;
+        case MafiaRole::Mafia:
+          _currentMelody = &_mafia;
+          break;
+        case MafiaRole::Don:
+          _currentMelody = &_don;
+          break;
 
-    void Play()
-    {
-      GetCurrentMelody()->play();
-    }
+        default:
+          break;
+      }
 
-    void Stop()
-    {
-      GetCurrentMelody()->stop();
+      _currentMelody->play();
     }
 
     void Loop()
     {
-      GetCurrentMelody()->loop();
+      _currentMelody->loop();
     }
 
-    bool IsActive()
+    bool IsFinished()
     {
-      return GetCurrentMelody()->getState() != BuzzerMelody::IDLE;
+      return _currentMelody->getState() == BuzzerMelody::IDLE;
     }
 
   private:
-    BuzzerMelody* GetCurrentMelody()
-    {
-      return &mMelodies[mCurrentMelodyIndex];
-    }
 
-    BuzzerMelody* mMelodies;
-    uint8_t mMelodiesCount;
-    uint8_t mCurrentMelodyIndex;
+    BuzzerMelody _beep = BuzzerMelody(buzzerPin, DoorBeep::melodyLength, DoorBeep::melody);
+    BuzzerMelody _citizen = BuzzerMelody(buzzerPin, Aha::melodyLength, Aha::melody);
+    BuzzerMelody _sheriff = BuzzerMelody(buzzerPin, Pirates::melodyLength, Pirates::melody);
+    BuzzerMelody _mafia = BuzzerMelody(buzzerPin, PinkPanther::melodyLength, PinkPanther::melody);
+    BuzzerMelody _don = BuzzerMelody(buzzerPin, Godfather::melodyLength, Godfather::melody);
+
+    BuzzerMelody* _currentMelody = &_citizen;
 };
