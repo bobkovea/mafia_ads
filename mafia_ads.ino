@@ -6,6 +6,7 @@
 #include "config.h"
 #include "musicplayer.h"
 #include "pwmmanager.h"
+#include "cardhandler.h"
 
 StateMachine stateMachine(transitions, TransitionsCount, State::Card);
 LCD_1602_RUS lcd(LcdI2cAddress, LcdColsCount, LcdRowsCount);
@@ -13,6 +14,7 @@ LcdManager lcdManager(&lcd, loadingMessages, LoadingMessagesCount);
 RoleManager roleManager;
 MusicPlayer<BuzzerPin> musicPlayer;
 PwmManager<BacklightPin> pwmManager;
+CardHandler cardHandler;
 
 void StartLoading()
 {

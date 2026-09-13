@@ -1,11 +1,9 @@
-#include "extint.h"
-#include "statemachine.h"
+#include "cardhandler.h"
 
-extern StateMachine stateMachine;
+extern CardHandler cardHandler;
 
 // ============ Прерывание карты ============
 ISR(INT0_vect)
 {
-  ExtInt::DisableInterrupt();
-  stateMachine.TriggerEvent(Event::CardDetected);
+  cardHandler.OnCardDetected();
 }
