@@ -55,7 +55,9 @@ void setup()
   randomSeed(analogRead(0));
   pinMode(BacklightPin, OUTPUT);
   pinMode(BuzzerPin, OUTPUT);
-  pinMode(IsrPin, INPUT_PULLUP);
+  pinMode(CardReaderPin, OUTPUT);
+  digitalWrite(CardReaderPin, HIGH);
+  pinMode(IsrPin, INPUT); // внешняя подтяжка 
   lcdManager.Begin();
   ExtInt::ConfigInterrupt();
   ExtInt::EnableInterrupt();
