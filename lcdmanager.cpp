@@ -1,7 +1,5 @@
 #include "lcdmanager.h"
-
 #include <GTimer.h>
-#include "nvmanager.h"
 
 LcdManager::LcdManager(LCD_1602_RUS* lcd, const char** loadingMessages, uint8_t loadingMessagesCount) :
   _lcd(lcd),
@@ -32,24 +30,35 @@ void LcdManager::PrintCityFallingAsleep()
   _lcd->print({"   засыпает...  "});
 }
 
-void LcdManager::UpdateAttemptsMessage()
-{
-  EVERY_MS(_idleTextPeriodMs)
-  {
-    _lcd->setCursor(0, 0);
-    _lcd->print("КОЛ-ВО ПОПЫТОК:");
-
-    const uint32_t attempts = NvManager::GetAttempts();
-    _lcd->setCursor(0, 1);
-    _lcd->print(attempts, 10);
-  }
-}
-
 void LcdManager::UpdateLoadingMessage()
 {
   _lcd->setCursor(0, 0);
   _lcd->print(_loadingMessages[_currentLoadingMessageIndex]);
   ++_currentLoadingMessageIndex;
+}
+
+void LcdManager::PrintIdleMessage()
+{
+  _lcd->setCursor(0, 0);
+  _lcd->print("Жду пропуск");
+}
+
+void LcdManager::UpdateIdleAnimation()
+{
+  EVERY_MS(_idleTextPeriodMs)
+  {
+    static uint8_t pos = 11;
+        
+    if (pos == 14)
+    {
+      pos = 11;
+      _lcd->setCursor(pos, 0);
+      _lcd->print("   ");
+    }
+
+    _lcd->setCursor(pos++, 0);
+    _lcd->print(".");
+  }
 }
 
 bool LcdManager::IsLoadingFinished()

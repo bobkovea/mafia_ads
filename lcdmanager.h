@@ -12,10 +12,11 @@ class LcdManager
     void ClearDisplay();
     void UpdateLoadingMessage();
     void PrintCityFallingAsleep();
-    void UpdateAttemptsMessage();
     bool UpdateLoading();
     void SetEnding(const MafiaRole role);
-
+    void PrintIdleMessage();
+    void UpdateIdleAnimation();
+    
   private:
 
     bool IsLoadingFinished();

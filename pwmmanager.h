@@ -76,7 +76,7 @@ class PwmManager
 
     static constexpr uint32_t _idlePwmPeriodMs = 20;
     static constexpr uint8_t _maxBrightness = 255;
-    static constexpr uint8_t _minBrightness = 25;
+    static constexpr uint8_t _minBrightness = 50;
 
     int16_t _brightness = 255;
     int16_t _brightnessStep = 1;

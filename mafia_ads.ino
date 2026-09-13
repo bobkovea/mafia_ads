@@ -17,7 +17,7 @@ PwmManager<BacklightPin> pwmManager;
 void StartLoading()
 {
   musicPlayer.PlayBeep();
-  
+
   do
   {
     musicPlayer.Loop();
@@ -47,6 +47,7 @@ void StartEnding()
 void StartCard()
 {
   lcdManager.ClearDisplay();
+  lcdManager.PrintIdleMessage();
   ExtInt::EnableInterrupt();
 }
 
@@ -57,8 +58,9 @@ void setup()
   pinMode(BuzzerPin, OUTPUT);
   pinMode(CardReaderPin, OUTPUT);
   digitalWrite(CardReaderPin, HIGH);
-  pinMode(IsrPin, INPUT); // внешняя подтяжка 
+  pinMode(IsrPin, INPUT); // внешняя подтяжка
   lcdManager.Begin();
+  lcdManager.PrintIdleMessage();
   ExtInt::ConfigInterrupt();
   ExtInt::EnableInterrupt();
   NvManager::Initialize();
@@ -72,7 +74,7 @@ void loop()
   {
     case State::Card:
       pwmManager.Breath();
-      lcdManager.UpdateAttemptsMessage();
+      lcdManager.UpdateIdleAnimation();
       break;
 
     case State::Loading:
@@ -81,7 +83,7 @@ void loop()
         stateMachine.TriggerEvent(Event::LoadingFinished);
       }
       break;
-    
+
     case State::Ending:
 
       musicPlayer.Loop();

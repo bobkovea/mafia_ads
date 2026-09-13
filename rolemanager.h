@@ -10,17 +10,17 @@ enum class MafiaRole : uint8_t
 
 class RoleManager
 {
-	public: 
-	void GenerateRole()
-	{
-    _role = (MafiaRole)random(RolesCount);
-	}
+  public:
+    void GenerateRole()
+    {
+      _role = (MafiaRole)random(RolesCount);
+    }
 
-  MafiaRole GetRole()
-  {
-    return _role;
-  }
+    MafiaRole GetRole()
+    {
+      return _role;
+    }
   private:
-  static constexpr uint8_t RolesCount = 4;
-  MafiaRole _role = (MafiaRole)0;
+    static constexpr uint8_t RolesCount = 4;
+    MafiaRole _role = (MafiaRole)0;
 };
