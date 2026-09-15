@@ -12,9 +12,7 @@ class CardHandler
 
     void OnCardDetected()
     {
-      _timer = millis();
-
-      if (_timer - millis() < MaxTimer)
+      if (millis() - _timer < MaxTimer)
       {
         ++_detectedCounter;
 
@@ -29,11 +27,13 @@ class CardHandler
       {
         _detectedCounter = 1;
       }
+
+      _timer = millis();
     }
 
   private:
-    uint8_t _detectedCounter = 0;
-    uint32_t _timer = 0;
+    volatile uint8_t _detectedCounter = 0;
+    volatile uint32_t _timer = 0;
     static constexpr uint8_t MaxDetectedCounter = 3;
-    static constexpr uint8_t MaxTimer = 100;
+    static constexpr uint32_t MaxTimer = 100;
 };
