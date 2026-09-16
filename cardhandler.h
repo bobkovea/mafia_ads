@@ -10,10 +10,18 @@ class CardHandler
       rfid.begin(9600);
     }
 
+    void Prepare()
+    {
+      while (_rfid.available())
+      {
+        (void)_rfid.read();
+      }
+    }
+
     bool Handle()
     {
       bool isFound = false;
-      
+
       // 1. Таймаут
       if ((_byteIndex > 0) && ((millis() - _lastByteTime) > ByteTimeoutMs))
       {
@@ -56,19 +64,19 @@ class CardHandler
 
       return isFound;
     }
-
+    
   private:
 
     bool isXorCorrect()
     {
       uint8_t data[5];
-      for (int i = 0; i < 5; ++i)
+      for (uint8_t i = 0; i < 5; ++i)
       {
         data[i] = (hex2byte(_packet[1 + i * 2]) << 4) | hex2byte(_packet[2 + i * 2]);
       }
 
       uint8_t xor_sum = 0;
-      for (int i = 0; i < 5; ++i)
+      for (uint8_t i = 0; i < 5; ++i)
       {
         xor_sum ^= data[i];
       }
@@ -91,6 +99,7 @@ class CardHandler
     static constexpr uint8_t StartByte = 0x02;
     static constexpr uint8_t EndByte = 0x03;
     static constexpr uint32_t ByteTimeoutMs = 100;
+
     uint8_t _packet[PacketSize];
     uint8_t _byteIndex = 0;
     uint32_t _lastByteTime = 0;

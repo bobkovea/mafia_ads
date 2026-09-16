@@ -46,6 +46,7 @@ void StartEnding()
 
 void StartCard()
 {
+  cardHandler.Prepare();
   lcdManager.ClearDisplay();
   lcdManager.PrintIdleMessage();
 }
