@@ -1,20 +1,20 @@
-#include "extint.h"
 #include "lcdmanager.h"
 #include "statemachine.h"
-#include "nvmanager.h"
 #include "rolemanager.h"
 #include "config.h"
 #include "musicplayer.h"
 #include "pwmmanager.h"
 #include "cardhandler.h"
+#include <SoftwareSerial.h>
 
+SoftwareSerial rfid(2, 2);
 StateMachine stateMachine(transitions, TransitionsCount, State::Card);
 LCD_1602_RUS lcd(LcdI2cAddress, LcdColsCount, LcdRowsCount);
 LcdManager lcdManager(&lcd, loadingMessages, LoadingMessagesCount);
 RoleManager roleManager;
 MusicPlayer<BuzzerPin> musicPlayer;
 PwmManager<BacklightPin> pwmManager;
-CardHandler cardHandler;
+CardHandler cardHandler(rfid);
 
 void StartLoading()
 {
@@ -25,10 +25,8 @@ void StartLoading()
     musicPlayer.Loop();
   } while (!musicPlayer.IsFinished());
 
-  NvManager::IncrementAttempts();
-
   pwmManager.ResetPwm();
-  lcdManager.ClearDisplay();
+  lcdManager.ResetIdleAnimation();
   lcdManager.UpdateLoadingMessage();
 
   roleManager.GenerateRole();
@@ -50,7 +48,6 @@ void StartCard()
 {
   lcdManager.ClearDisplay();
   lcdManager.PrintIdleMessage();
-  ExtInt::EnableInterrupt();
 }
 
 void setup()
@@ -60,12 +57,8 @@ void setup()
   pinMode(BuzzerPin, OUTPUT);
   pinMode(CardReaderPin, OUTPUT);
   digitalWrite(CardReaderPin, HIGH);
-  pinMode(IsrPin, INPUT); // внешняя подтяжка
   lcdManager.Begin();
   lcdManager.PrintIdleMessage();
-  ExtInt::ConfigInterrupt();
-  ExtInt::EnableInterrupt();
-  NvManager::Initialize();
 }
 
 void loop()
@@ -77,6 +70,10 @@ void loop()
     case State::Card:
       pwmManager.Breath();
       lcdManager.UpdateIdleAnimation();
+      if (cardHandler.Handle())
+      {
+        stateMachine.TriggerEvent(Event::CardDetected);
+      }
       break;
 
     case State::Loading:

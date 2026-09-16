@@ -45,20 +45,24 @@ void LcdManager::PrintIdleMessage()
 
 void LcdManager::UpdateIdleAnimation()
 {
-  EVERY_MS(_idleTextPeriodMs)
+  EVERY_MS(_idleFrameTimeMs)
   {
-    static uint8_t pos = 11;
-        
-    if (pos == 14)
+    if (_idleDotPosition == 14)
     {
-      pos = 11;
-      _lcd->setCursor(pos, 0);
+      _idleDotPosition = 11;
+      _lcd->setCursor(_idleDotPosition, 0);
       _lcd->print("   ");
     }
 
-    _lcd->setCursor(pos++, 0);
+    _lcd->setCursor(_idleDotPosition++, 0);
     _lcd->print(".");
   }
+}
+
+void LcdManager::ResetIdleAnimation()
+{
+  ClearDisplay();
+  _idleDotPosition = 11;
 }
 
 bool LcdManager::IsLoadingFinished()

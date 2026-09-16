@@ -16,7 +16,8 @@ class LcdManager
     void SetEnding(const MafiaRole role);
     void PrintIdleMessage();
     void UpdateIdleAnimation();
-    
+    void ResetIdleAnimation();
+
   private:
 
     bool IsLoadingFinished();
@@ -26,11 +27,12 @@ class LcdManager
     void ResetLoadingMessages();
 
     static constexpr uint8_t BarLength = 16;
-    static constexpr uint32_t _idleTextPeriodMs = 1000;
+    static constexpr uint32_t _idleFrameTimeMs = 1000;
+    uint8_t _idleDotPosition = 11;
 
-    LCD_1602_RUS* _lcd;
     const char** _loadingMessages;
     uint8_t _loadingMessagesCount;
     uint8_t _currentLoadingMessageIndex = 0;
     uint8_t _currentProgressBarIndex = 0;
+    LCD_1602_RUS* _lcd;
 };
