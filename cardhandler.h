@@ -55,35 +55,58 @@ class CardHandler
         if (_byteIndex == PacketSize)
         {
           _byteIndex = 0;
-          if ((_packet[13] == 0x03) && isXorCorrect())
+
+          if (_packet[13] == EndByte)
           {
-            isFound = true;
+            idToHex();
+            if (isPacketNotEmpty() && isXorCorrect())
+            {
+              isFound = true;
+            }
           }
         }
       }
 
       return isFound;
     }
-    
+
   private:
+
+    void idToHex()
+    {
+      for (uint8_t i = 0; i < IdBytesCount; ++i)
+      {
+        _id[i] = (hex2byte(_packet[1 + i * 2]) << 4) | hex2byte(_packet[2 + i * 2]);
+      }
+    }
+
+    bool isPacketNotEmpty()
+    {
+      bool isNotEmpty = false;
+
+      for (uint8_t i = 0; i < IdBytesCount; ++i)
+      {
+        if (_id[i] != 0x00)
+        {
+          isNotEmpty = true;
+          break;
+        }
+      }
+
+      return isNotEmpty;
+    }
 
     bool isXorCorrect()
     {
-      uint8_t data[5];
-      for (uint8_t i = 0; i < 5; ++i)
+      uint8_t calculatedXor = 0;
+      for (uint8_t i = 0; i < IdBytesCount; ++i)
       {
-        data[i] = (hex2byte(_packet[1 + i * 2]) << 4) | hex2byte(_packet[2 + i * 2]);
+        calculatedXor ^= _id[i];
       }
 
-      uint8_t xor_sum = 0;
-      for (uint8_t i = 0; i < 5; ++i)
-      {
-        xor_sum ^= data[i];
-      }
+      const uint8_t receivedXor = (hex2byte(_packet[11]) << 4) | hex2byte(_packet[12]);
 
-      uint8_t rx_sum = (hex2byte(_packet[11]) << 4) | hex2byte(_packet[12]);
-
-      return xor_sum == rx_sum;
+      return calculatedXor == receivedXor;
     }
 
     // Преобразует ASCII-символ '0'..'9', 'A'..'F', 'a'..'f' в число 0..15
@@ -95,11 +118,13 @@ class CardHandler
       return -1; // невалидный символ
     }
 
-    static constexpr uint8_t PacketSize = 14;
     static constexpr uint8_t StartByte = 0x02;
     static constexpr uint8_t EndByte = 0x03;
     static constexpr uint32_t ByteTimeoutMs = 100;
+    static constexpr uint8_t PacketSize = 14;
+    static constexpr uint8_t IdBytesCount = 5;
 
+    uint8_t _id[IdBytesCount];
     uint8_t _packet[PacketSize];
     uint8_t _byteIndex = 0;
     uint32_t _lastByteTime = 0;
