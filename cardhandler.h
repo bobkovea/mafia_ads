@@ -1,6 +1,9 @@
 #pragma once
 #include <SoftwareSerial.h>
 
+// Мой:   0x42 0x00 0x9E 0x97 0x44 0x0F
+// Катин: 0x4A 0x00 0x59 0x8E 0x8F 0x12
+
 class CardHandler
 {
   public:
@@ -16,13 +19,15 @@ class CardHandler
       {
         (void)_rfid.read();
       }
+      _byteIndex = 0;
+      _confirmCount = 0;
+      _lastIdValid = false;
     }
 
     bool Handle()
     {
       bool isFound = false;
 
-      // 1. Таймаут
       if ((_byteIndex > 0) && ((millis() - _lastByteTime) > ByteTimeoutMs))
       {
         _byteIndex = 0;
@@ -33,7 +38,6 @@ class CardHandler
         const uint8_t receivedByte = _rfid.read();
         _lastByteTime = millis();
 
-        // 2. Ресинхронизация по стартовому байту
         if (receivedByte == StartByte)
         {
           _packet[0] = StartByte;
@@ -41,17 +45,13 @@ class CardHandler
           continue;
         }
 
-        // 3. Если пакет ещё не начат — игнорируем
         if (_byteIndex == 0)
         {
           continue;
         }
 
-        // 4. Накапливаем
-        _packet[_byteIndex] = receivedByte;
-        ++_byteIndex;
+        _packet[_byteIndex++] = receivedByte;
 
-        // 5. Пакет собран
         if (_byteIndex == PacketSize)
         {
           _byteIndex = 0;
@@ -59,9 +59,27 @@ class CardHandler
           if (_packet[13] == EndByte)
           {
             idToHex();
+
             if (isPacketNotEmpty() && isXorCorrect())
             {
-              isFound = true;
+              if (_lastIdValid && isSameId())
+              {
+                ++_confirmCount;
+              }
+              else
+              {
+                saveId();
+                _confirmCount = 1;
+              }
+              _lastIdValid = true;
+
+              if (_confirmCount >= RequiredConfirmations)
+              {
+                _confirmCount = 0;      // сброс для следующего цикла
+                _lastIdValid = false;   // чтобы не зациклиться на одном ключе
+                isFound = true;
+
+              }
             }
           }
         }
@@ -82,18 +100,11 @@ class CardHandler
 
     bool isPacketNotEmpty()
     {
-      bool isNotEmpty = false;
-
       for (uint8_t i = 0; i < IdBytesCount; ++i)
       {
-        if (_id[i] != 0x00)
-        {
-          isNotEmpty = true;
-          break;
-        }
+        if (_id[i] != 0x00) return true;
       }
-
-      return isNotEmpty;
+      return false;
     }
 
     bool isXorCorrect()
@@ -103,19 +114,37 @@ class CardHandler
       {
         calculatedXor ^= _id[i];
       }
-
       const uint8_t receivedXor = (hex2byte(_packet[11]) << 4) | hex2byte(_packet[12]);
-
       return calculatedXor == receivedXor;
     }
 
-    // Преобразует ASCII-символ '0'..'9', 'A'..'F', 'a'..'f' в число 0..15
+    bool isSameId()
+    {
+      for (uint8_t i = 0; i < IdBytesCount; ++i)
+      {
+        if (_id[i] != _prevId[i]) 
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // Сохраняем текущий ID как предыдущий
+    void saveId()
+    {
+      for (uint8_t i = 0; i < IdBytesCount; ++i)
+      {
+        _prevId[i] = _id[i];
+      }
+    }
+
     int8_t hex2byte(uint8_t c)
     {
-      if (c >= '0' && c <= '9') return c - '0';        // '0'..'9'  -> 0..9
-      if (c >= 'A' && c <= 'F') return c - 'A' + 10;   // 'A'..'F'  -> 10..15
-      if (c >= 'a' && c <= 'f') return c - 'a' + 10;   // 'a'..'f'  -> 10..15
-      return -1; // невалидный символ
+      if (c >= '0' && c <= '9') return c - '0';
+      if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+      if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+      return -1;
     }
 
     static constexpr uint8_t StartByte = 0x02;
@@ -123,10 +152,15 @@ class CardHandler
     static constexpr uint32_t ByteTimeoutMs = 100;
     static constexpr uint8_t PacketSize = 14;
     static constexpr uint8_t IdBytesCount = 5;
+    static constexpr uint8_t RequiredConfirmations = 2;
 
     uint8_t _id[IdBytesCount];
+    uint8_t _prevId[IdBytesCount];
     uint8_t _packet[PacketSize];
     uint8_t _byteIndex = 0;
     uint32_t _lastByteTime = 0;
+    uint8_t _confirmCount = 0;
+    bool _lastIdValid = false;
+
     SoftwareSerial& _rfid;
 };
