@@ -2,8 +2,9 @@
 
 #include "statemachine.h"
 
+static constexpr uint8_t CardReaderDataPin = 2;
 static constexpr uint8_t BuzzerPin = 3;
-static constexpr uint8_t CardReaderPin = 4;
+static constexpr uint8_t CardReaderPowerPin = 4;
 static constexpr uint8_t BacklightPin = 9;
 static constexpr uint8_t LcdI2cAddress = 0x27;
 static constexpr uint8_t LcdRowsCount = 2;

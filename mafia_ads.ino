@@ -1,3 +1,4 @@
+#include <SoftwareSerial.h>
 #include "lcdmanager.h"
 #include "statemachine.h"
 #include "rolemanager.h"
@@ -5,9 +6,8 @@
 #include "musicplayer.h"
 #include "pwmmanager.h"
 #include "cardhandler.h"
-#include <SoftwareSerial.h>
 
-SoftwareSerial rfid(2, 2);
+SoftwareSerial rfid(CardReaderDataPin, CardReaderDataPin);
 StateMachine stateMachine(transitions, TransitionsCount, State::Card);
 LCD_1602_RUS lcd(LcdI2cAddress, LcdColsCount, LcdRowsCount);
 LcdManager lcdManager(&lcd, loadingMessages, LoadingMessagesCount);
@@ -56,8 +56,8 @@ void setup()
   randomSeed(analogRead(0));
   pinMode(BacklightPin, OUTPUT);
   pinMode(BuzzerPin, OUTPUT);
-  pinMode(CardReaderPin, OUTPUT);
-  digitalWrite(CardReaderPin, HIGH);
+  pinMode(CardReaderPowerPin, OUTPUT);
+  digitalWrite(CardReaderPowerPin, HIGH);
   lcdManager.Begin();
   lcdManager.PrintIdleMessage();
 }
