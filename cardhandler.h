@@ -1,9 +1,6 @@
 #pragma once
 #include <SoftwareSerial.h>
 
-// Мой:   0x42 0x00 0x9E 0x97 0x44 0x0F
-// Катин: 0x4A 0x00 0x59 0x8E 0x8F 0x12
-
 class CardHandler
 {
   public:
@@ -24,6 +21,11 @@ class CardHandler
       _lastIdValid = false;
     }
 
+    void GetLastId(uint8_t* out)
+    {
+      memcpy(out, _id, IdBytesCount);
+    }
+    
     bool Handle()
     {
       bool isFound = false;
@@ -122,7 +124,7 @@ class CardHandler
     {
       for (uint8_t i = 0; i < IdBytesCount; ++i)
       {
-        if (_id[i] != _prevId[i]) 
+        if (_id[i] != _prevId[i])
         {
           return false;
         }

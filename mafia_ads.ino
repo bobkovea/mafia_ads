@@ -6,6 +6,7 @@
 #include "musicplayer.h"
 #include "pwmmanager.h"
 #include "cardhandler.h"
+#include "cardstorage.h"
 
 SoftwareSerial rfid(CardReaderDataPin, CardReaderDataPin);
 StateMachine stateMachine(transitions, TransitionsCount, State::Card);
@@ -15,6 +16,7 @@ RoleManager roleManager;
 MusicPlayer<BuzzerPin> musicPlayer;
 PwmManager<BacklightPin> pwmManager;
 CardHandler cardHandler(rfid);
+CardStorage cardStorage;
 
 void StartLoading()
 {
@@ -70,10 +72,25 @@ void loop()
   {
     case State::Card:
       pwmManager.Breath();
-      lcdManager.UpdateIdleAnimation();
+      //lcdManager.UpdateIdleAnimation();
       if (cardHandler.Handle())
       {
-        stateMachine.TriggerEvent(Event::CardDetected);
+        uint8_t id[5];
+        cardHandler.GetLastId(id);
+        const uint32_t timeLeftMs = cardStorage.AddId(id);
+        if (timeLeftMs == 0U)
+        {
+          stateMachine.TriggerEvent(Event::CardDetected);
+        }
+        else
+        {
+          lcdManager.PrintTimeLeft(timeLeftMs);
+          musicPlayer.PlayOops();
+          do
+          {
+            musicPlayer.Loop();
+          } while (!musicPlayer.IsFinished());
+        }
       }
       break;
 

@@ -98,7 +98,7 @@ void LcdManager::ResetLoadingMessages()
 
 bool LcdManager::UpdateLoading()
 {
-  static uint32_t period = 100;
+  static uint32_t period = 20;
   bool loadingIsFinished = false;
 
   EVERY_MS(period)
@@ -155,4 +155,24 @@ void LcdManager::SetEnding(const MafiaRole role)
 
   _lcd->setCursor(0, 1);
   _lcd->print(endingMsg);
+}
+
+void LcdManager::PrintTimeLeft(const uint32_t timeLeftMs)
+{
+  const uint32_t totalSeconds = timeLeftMs / 1000;
+  const uint8_t hours = totalSeconds / 3600;
+  const uint8_t minutes = (totalSeconds % 3600) / 60;
+  const uint8_t seconds = totalSeconds % 60;
+
+  _lcd->setCursor(0, 0);
+  _lcd->print("Подождите...");
+  _lcd->setCursor(0, 1);
+  if (hours < 10) _lcd->print("0");
+  _lcd->print(hours, 10);
+  _lcd->print(":");
+  if (minutes < 10) _lcd->print("0");
+  _lcd->print(minutes, 10);
+  _lcd->print(":");
+  if (seconds < 10) _lcd->print("0");
+  _lcd->print(seconds, 10);
 }

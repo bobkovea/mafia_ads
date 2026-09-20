@@ -6,6 +6,7 @@
 #include "melodies/pirates.h"
 #include "melodies/aha.h"
 #include "melodies/doorbeep.h"
+#include "melodies/oopsbeep.h"
 #include "rolemanager.h"
 
 template <uint8_t buzzerPin>
@@ -16,6 +17,12 @@ class MusicPlayer
     void PlayBeep()
     {
       _currentMelody = &_beep;
+      _currentMelody->play();
+    }
+
+    void PlayOops()
+    {
+      _currentMelody = &_oops;
       _currentMelody->play();
     }
 
@@ -55,6 +62,7 @@ class MusicPlayer
 
   private:
 
+    BuzzerMelody _oops = BuzzerMelody(buzzerPin, OopsBeep::melodyLength, OopsBeep::melody);
     BuzzerMelody _beep = BuzzerMelody(buzzerPin, DoorBeep::melodyLength, DoorBeep::melody);
     BuzzerMelody _citizen = BuzzerMelody(buzzerPin, Aha::melodyLength, Aha::melody);
     BuzzerMelody _sheriff = BuzzerMelody(buzzerPin, Pirates::melodyLength, Pirates::melody);

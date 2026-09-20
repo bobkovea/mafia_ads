@@ -17,6 +17,7 @@ class LcdManager
     void PrintIdleMessage();
     void UpdateIdleAnimation();
     void ResetIdleAnimation();
+    void PrintTimeLeft(uint32_t timeLeftMs);
 
   private:
 
