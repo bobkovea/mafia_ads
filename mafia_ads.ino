@@ -20,6 +20,7 @@ CardStorage cardStorage;
 
 void StartLoading()
 {
+  rfid.end();
   musicPlayer.PlayBeep();
 
   do
@@ -48,9 +49,10 @@ void StartEnding()
 
 void StartCard()
 {
-  cardHandler.Prepare();
   lcdManager.ClearDisplay();
   lcdManager.PrintIdleMessage();
+  cardHandler.Prepare();
+  rfid.begin(9600);
 }
 
 void setup()
@@ -85,11 +87,15 @@ void loop()
         else
         {
           lcdManager.PrintTimeLeft(timeLeftMs);
+
+          rfid.end();
           musicPlayer.PlayOops();
           do
           {
             musicPlayer.Loop();
           } while (!musicPlayer.IsFinished());
+          cardHandler.Prepare();
+          rfid.begin(9600);
         }
       }
       break;
