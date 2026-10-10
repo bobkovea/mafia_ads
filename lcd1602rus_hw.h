@@ -47,6 +47,12 @@ class Lcd1602rus_hw : public LiquidCrystal_I2C
       }
     }
 
+    template <typename T> 
+    void print(T val, int base)
+    {
+      LiquidCrystal_I2C::print(val, base);
+    }
+
   private:
 
     uint8_t convert(const uint16_t utf16)

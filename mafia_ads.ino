@@ -10,7 +10,7 @@
 
 SoftwareSerial rfid(CardReaderDataPin, CardReaderDataPin);
 StateMachine stateMachine(transitions, TransitionsCount, State::Card);
-LCD_1602_RUS lcd(LcdI2cAddress, LcdColsCount, LcdRowsCount);
+Lcd1602rus_hw lcd(LcdI2cAddress, LcdColsCount, LcdRowsCount);
 LcdManager lcdManager(&lcd, loadingMessages, LoadingMessagesCount);
 RoleManager roleManager;
 MusicPlayer<BuzzerPin> musicPlayer;

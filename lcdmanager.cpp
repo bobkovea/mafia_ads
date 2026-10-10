@@ -1,7 +1,7 @@
 #include "lcdmanager.h"
 #include <GTimer.h>
 
-LcdManager::LcdManager(LCD_1602_RUS* lcd, const char** loadingMessages, uint8_t loadingMessagesCount) :
+LcdManager::LcdManager(Lcd1602rus_hw* lcd, const char** loadingMessages, uint8_t loadingMessagesCount) :
   _lcd(lcd),
   _loadingMessages(loadingMessages),
   _loadingMessagesCount(loadingMessagesCount)

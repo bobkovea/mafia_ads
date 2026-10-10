@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Arduino.h>
+
 enum class MafiaRole : uint8_t
 {
   Citizen = 0,
