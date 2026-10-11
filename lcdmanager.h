@@ -27,7 +27,7 @@ class LcdManager
     void ResetLoadingMessages();
 
     static constexpr uint8_t BarLength = 16;
-    static constexpr uint32_t _idleFrameTimeMs = 1000;
+    static constexpr uint32_t _idleFrameTimeMs = 750;
     uint8_t _idleDotPosition = 11;
 
     const char** _loadingMessages;

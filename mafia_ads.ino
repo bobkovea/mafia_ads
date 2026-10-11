@@ -74,7 +74,7 @@ void loop()
   {
     case State::Card:
       pwmManager.Breath();
-      //lcdManager.UpdateIdleAnimation();
+      lcdManager.UpdateIdleAnimation();
       if (cardHandler.Handle())
       {
         uint8_t id[5];
