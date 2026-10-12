@@ -87,7 +87,7 @@ void HandleState(const State state)
         else
         {
           rfid.end();
-          
+
           musicPlayer.PlayOops();
           do
           {
@@ -96,8 +96,13 @@ void HandleState(const State state)
 
           pwmManager.ResetPwm();
           lcdManager.ClearDisplay();
-          lcdManager.PrintTimeLeft(timeLeftMs);
-          delay(2000);
+          for (uint8_t i = 0; i < 5; ++i)
+          {
+            // переход через ноль
+            const int32_t timeLeftDisplayed = (int32_t)timeLeftMs - ((int32_t)1000 * (int32_t)i);
+            lcdManager.PrintTimeLeft(timeLeftDisplayed < 0 ? 0U : (uint32_t)timeLeftDisplayed);
+            delay(1000);
+          }
 
           lcdManager.ClearDisplay();
           lcdManager.PrintIdleMessage();
