@@ -32,7 +32,7 @@ void StartEnding()
   pwmManager.ResetPwm();
   lcdManager.ClearDisplay();
   roleManager.GenerateRole();
-  
+
   const MafiaRole role = roleManager.GetRole();
   musicPlayer.PlayRole(role);
   lcdManager.PrintCityFallingAsleep();
@@ -65,8 +65,12 @@ void setup()
 void loop()
 {
   const State currentState = stateMachine.Process();
+  HandleState(currentState);
+}
 
-  switch (currentState)
+void HandleState(const State state)
+{
+  switch (state)
   {
     case State::Card:
       pwmManager.Breath();
@@ -82,14 +86,21 @@ void loop()
         }
         else
         {
-          lcdManager.PrintTimeLeft(timeLeftMs);
-
           rfid.end();
+          
           musicPlayer.PlayOops();
           do
           {
             musicPlayer.Loop();
           } while (!musicPlayer.IsFinished());
+
+          pwmManager.ResetPwm();
+          lcdManager.ClearDisplay();
+          lcdManager.PrintTimeLeft(timeLeftMs);
+          delay(2000);
+
+          lcdManager.ClearDisplay();
+          lcdManager.PrintIdleMessage();
           cardHandler.Prepare();
           rfid.begin(9600);
         }

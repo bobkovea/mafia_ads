@@ -92,8 +92,9 @@ void LcdManager::PrintTimeLeft(const uint32_t timeLeftMs)
   const uint8_t seconds = totalSeconds % 60;
 
   _lcd.setCursor(0, 0);
-  _lcd.print("Подождите...");
+  _lcd.print("Возвращайтесь");
   _lcd.setCursor(0, 1);
+  _lcd.print("через ");
   if (hours < 10) _lcd.print("0");
   _lcd.print(hours, 10);
   _lcd.print(":");
