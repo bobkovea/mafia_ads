@@ -7,7 +7,7 @@
 class LcdManager
 {
   public:
-    LcdManager(Lcd1602rus_hw* lcd);
+    LcdManager(Lcd1602rus_hw& lcd);
     void Begin();
     void ClearDisplay();
     void PrintCityFallingAsleep();
@@ -22,7 +22,7 @@ class LcdManager
     static constexpr uint8_t BarLength = 16;
     static constexpr uint32_t _idleFrameTimeMs = 750;
     
-    Lcd1602rus_hw* _lcd;
+    Lcd1602rus_hw& _lcd;
 
     uint8_t ArrowDown0[8] =
     {

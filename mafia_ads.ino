@@ -11,7 +11,7 @@
 SoftwareSerial rfid(CardReaderDataPin, CardReaderDataPin);
 StateMachine stateMachine(transitions, TransitionsCount, State::Card);
 Lcd1602rus_hw lcd(LcdI2cAddress, LcdColsCount, LcdRowsCount);
-LcdManager lcdManager(&lcd);
+LcdManager lcdManager(lcd);
 RoleManager roleManager;
 MusicPlayer<BuzzerPin> musicPlayer;
 PwmManager<BacklightPin> pwmManager;

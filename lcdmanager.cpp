@@ -1,43 +1,43 @@
 #include "lcdmanager.h"
 #include <GTimer.h>
 
-LcdManager::LcdManager(Lcd1602rus_hw* lcd) :
+LcdManager::LcdManager(Lcd1602rus_hw& lcd) :
   _lcd(lcd)
 {
 }
 
 void LcdManager::Begin()
 {
-  _lcd->init();
-  _lcd->backlight();
-  _lcd->createChar(0, ArrowDown0);
+  _lcd.init();
+  _lcd.backlight();
+  _lcd.createChar(0, ArrowDown0);
 }
 
 void LcdManager::ClearDisplay()
 {
-  _lcd->setCursor(0, 0);
-  _lcd->print("                ");
-  _lcd->setCursor(0, 1);
-  _lcd->print("                ");
+  _lcd.setCursor(0, 0);
+  _lcd.print("                ");
+  _lcd.setCursor(0, 1);
+  _lcd.print("                ");
 }
 
 void LcdManager::PrintCityFallingAsleep()
 {
-  _lcd->setCursor(0, 0);
-  _lcd->print({"   Город        "});
-  _lcd->setCursor(0, 1);
-  _lcd->print({"   засыпает...  "});
+  _lcd.setCursor(0, 0);
+  _lcd.print({"   Город        "});
+  _lcd.setCursor(0, 1);
+  _lcd.print({"   засыпает...  "});
 }
 void LcdManager::PrintIdleMessage()
 {
-  _lcd->setCursor(0, 0);
-  _lcd->print("Приложи пропуск ");
-  _lcd->setCursor(4, 1);
-  _lcd->write((uint8_t)0);
-  _lcd->setCursor(7, 1);
-  _lcd->write((uint8_t)0);
-  _lcd->setCursor(10, 1);
-  _lcd->write((uint8_t)0);
+  _lcd.setCursor(0, 0);
+  _lcd.print("Приложи пропуск ");
+  _lcd.setCursor(4, 1);
+  _lcd.write((uint8_t)0);
+  _lcd.setCursor(7, 1);
+  _lcd.write((uint8_t)0);
+  _lcd.setCursor(10, 1);
+  _lcd.write((uint8_t)0);
 }
 
 void LcdManager::UpdateIdleAnimation()
@@ -45,7 +45,7 @@ void LcdManager::UpdateIdleAnimation()
   EVERY_MS(_idleFrameTimeMs)
   {
     static bool arrowState = false;
-    _lcd->createChar(0, arrowState ? ArrowDown0 : ArrowDown1);
+    _lcd.createChar(0, arrowState ? ArrowDown0 : ArrowDown1);
     arrowState = !arrowState;
   }
 }
@@ -77,11 +77,11 @@ void LcdManager::SetEnding(const MafiaRole role)
       break;
   }
 
-  _lcd->setCursor(0, 0);
-  _lcd->print({"Ваша роль:"     });
+  _lcd.setCursor(0, 0);
+  _lcd.print({"Ваша роль:"     });
 
-  _lcd->setCursor(0, 1);
-  _lcd->print(endingMsg);
+  _lcd.setCursor(0, 1);
+  _lcd.print(endingMsg);
 }
 
 void LcdManager::PrintTimeLeft(const uint32_t timeLeftMs)
@@ -91,15 +91,15 @@ void LcdManager::PrintTimeLeft(const uint32_t timeLeftMs)
   const uint8_t minutes = (totalSeconds % 3600) / 60;
   const uint8_t seconds = totalSeconds % 60;
 
-  _lcd->setCursor(0, 0);
-  _lcd->print("Подождите...");
-  _lcd->setCursor(0, 1);
-  if (hours < 10) _lcd->print("0");
-  _lcd->print(hours, 10);
-  _lcd->print(":");
-  if (minutes < 10) _lcd->print("0");
-  _lcd->print(minutes, 10);
-  _lcd->print(":");
-  if (seconds < 10) _lcd->print("0");
-  _lcd->print(seconds, 10);
+  _lcd.setCursor(0, 0);
+  _lcd.print("Подождите...");
+  _lcd.setCursor(0, 1);
+  if (hours < 10) _lcd.print("0");
+  _lcd.print(hours, 10);
+  _lcd.print(":");
+  if (minutes < 10) _lcd.print("0");
+  _lcd.print(minutes, 10);
+  _lcd.print(":");
+  if (seconds < 10) _lcd.print("0");
+  _lcd.print(seconds, 10);
 }
