@@ -8,36 +8,11 @@ LcdManager::LcdManager(Lcd1602rus_hw* lcd, const char** loadingMessages, uint8_t
 {
 }
 
-uint8_t ArrowDown0[8] =
-{
-  0b00000,
-  0b00000,
-  0b00000,
-  0b11111,
-  0b01110,
-  0b00100,
-  0b00000,
-  0b00000,
-};
-
-uint8_t ArrowDown1[8] =
-{
-  0b00000,
-  0b00000,
-  0b00000,
-  0b00000,
-  0b00000,
-  0b11111,
-  0b01110,
-  0b00100,
-};
-
 void LcdManager::Begin()
 {
   _lcd->init();
   _lcd->backlight();
   _lcd->createChar(0, ArrowDown0);
-  _lcd->createChar(1, ArrowDown1);
 }
 
 void LcdManager::ClearDisplay()
@@ -67,29 +42,27 @@ void LcdManager::PrintIdleMessage()
 {
   _lcd->setCursor(0, 0);
   _lcd->print("Приложи пропуск ");
+  _lcd->setCursor(4, 1);
+  _lcd->write((uint8_t)0);
+  _lcd->setCursor(7, 1);
+  _lcd->write((uint8_t)0);
+  _lcd->setCursor(10, 1);
+  _lcd->write((uint8_t)0);
 }
 
 void LcdManager::UpdateIdleAnimation()
 {
   EVERY_MS(_idleFrameTimeMs)
   {
-    static uint8_t arrowNum = 0;
-    
-    _lcd->setCursor(0, 1);
-    
-    for (uint8_t i = 0; i < 8; ++i)
-    {
-      _lcd->write(arrowNum);
-      _lcd->write(' ');
-    }
-    arrowNum = arrowNum == 0 ? 1 : 0;
+    static bool arrowState = false;
+    _lcd->createChar(0, arrowState ? ArrowDown0 : ArrowDown1);
+    arrowState = !arrowState;
   }
 }
 
 void LcdManager::ResetIdleAnimation()
 {
   ClearDisplay();
-  _idleDotPosition = 11;
 }
 
 bool LcdManager::IsLoadingFinished()
