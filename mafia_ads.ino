@@ -11,16 +11,15 @@
 SoftwareSerial rfid(CardReaderDataPin, CardReaderDataPin);
 StateMachine stateMachine(transitions, TransitionsCount, State::Card);
 Lcd1602rus_hw lcd(LcdI2cAddress, LcdColsCount, LcdRowsCount);
-LcdManager lcdManager(&lcd, loadingMessages, LoadingMessagesCount);
+LcdManager lcdManager(&lcd);
 RoleManager roleManager;
 MusicPlayer<BuzzerPin> musicPlayer;
 PwmManager<BacklightPin> pwmManager;
 CardHandler cardHandler(rfid);
 CardStorage cardStorage;
 
-void StartLoading()
+void StartEnding()
 {
-  rfid.end();
   musicPlayer.PlayBeep();
 
   do
@@ -28,15 +27,12 @@ void StartLoading()
     musicPlayer.Loop();
   } while (!musicPlayer.IsFinished());
 
+  rfid.end();
+
   pwmManager.ResetPwm();
-  lcdManager.ResetIdleAnimation();
-  lcdManager.UpdateLoadingMessage();
-
+  lcdManager.ClearDisplay();
   roleManager.GenerateRole();
-}
-
-void StartEnding()
-{
+  
   const MafiaRole role = roleManager.GetRole();
   musicPlayer.PlayRole(role);
   lcdManager.PrintCityFallingAsleep();
@@ -97,13 +93,6 @@ void loop()
           cardHandler.Prepare();
           rfid.begin(9600);
         }
-      }
-      break;
-
-    case State::Loading:
-      if (lcdManager.UpdateLoading())
-      {
-        stateMachine.TriggerEvent(Event::LoadingFinished);
       }
       break;
 

@@ -1,10 +1,8 @@
 #include "lcdmanager.h"
 #include <GTimer.h>
 
-LcdManager::LcdManager(Lcd1602rus_hw* lcd, const char** loadingMessages, uint8_t loadingMessagesCount) :
-  _lcd(lcd),
-  _loadingMessages(loadingMessages),
-  _loadingMessagesCount(loadingMessagesCount)
+LcdManager::LcdManager(Lcd1602rus_hw* lcd) :
+  _lcd(lcd)
 {
 }
 
@@ -30,14 +28,6 @@ void LcdManager::PrintCityFallingAsleep()
   _lcd->setCursor(0, 1);
   _lcd->print({"   засыпает...  "});
 }
-
-void LcdManager::UpdateLoadingMessage()
-{
-  _lcd->setCursor(0, 0);
-  _lcd->print(_loadingMessages[_currentLoadingMessageIndex]);
-  ++_currentLoadingMessageIndex;
-}
-
 void LcdManager::PrintIdleMessage()
 {
   _lcd->setCursor(0, 0);
@@ -63,69 +53,6 @@ void LcdManager::UpdateIdleAnimation()
 void LcdManager::ResetIdleAnimation()
 {
   ClearDisplay();
-}
-
-bool LcdManager::IsLoadingFinished()
-{
-  return (_currentLoadingMessageIndex == _loadingMessagesCount) && (_currentProgressBarIndex == BarLength);
-}
-
-bool LcdManager::IsProgressBarFull()
-{
-  return _currentProgressBarIndex == BarLength;
-}
-
-void LcdManager::UpdateProgressBar()
-{
-  _lcd->setCursor(_currentProgressBarIndex, 1);
-  _lcd->write(255);
-  ++_currentProgressBarIndex;
-}
-
-void LcdManager::ResetProgressBar()
-{
-  _currentProgressBarIndex = 0;
-  _lcd->setCursor(0, 1);
-  _lcd->print("                ");
-}
-
-void LcdManager::ResetLoadingMessages()
-{
-  _currentLoadingMessageIndex = 0;
-  _lcd->setCursor(0, 0);
-  _lcd->print("                ");
-}
-
-bool LcdManager::UpdateLoading()
-{
-  static uint32_t period = 20;
-  bool loadingIsFinished = false;
-
-  EVERY_MS(period)
-  {
-    // period = (uint32_t)random(50, 100); //TBD
-
-    loadingIsFinished = IsLoadingFinished();
-
-    if (loadingIsFinished)
-    {
-      ResetLoadingMessages();
-      ResetProgressBar();
-    }
-    else
-    {
-      if (IsProgressBarFull())
-      {
-        ResetProgressBar();
-        UpdateLoadingMessage();
-      }
-      else
-      {
-        UpdateProgressBar();
-      }
-    }
-  }
-  return loadingIsFinished;
 }
 
 void LcdManager::SetEnding(const MafiaRole role)
