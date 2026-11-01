@@ -1,33 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-
-// ============ Состояния ============
-enum class State : uint8_t
-{
-  Card,
-  Ending
-};
-
-// ============ События ============
-enum class Event : uint8_t
-{
-  None = 0x00,
-  CardDetected = 0x01,
-  EndingFinished = 0x02
-};
-
-// ============ Прототип действия ============
-typedef void (*ActionCallback)();
-
-// ============ Структура перехода ============
-struct Transition
-{
-  State currentState;
-  uint8_t event;
-  State nextState;
-  ActionCallback action;
-};
+#include "states.h"
 
 // ============ Класс конечного автомата ============
 class StateMachine

@@ -6,7 +6,7 @@
 namespace Pirates
 {
 
-static constexpr uint16_t Tempo = 1050U;
+static constexpr uint16_t Tempo = 100U;
 #undef N
 #define N(note, dur) CreateNote(note, dur, Tempo)
 

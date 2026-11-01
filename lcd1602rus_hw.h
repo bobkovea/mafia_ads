@@ -1,16 +1,87 @@
 #pragma once
 
 #include <LiquidCrystal_I2C.h>
+#include "contracts/idisplay.h"
 
-class Lcd1602rus_hw : public LiquidCrystal_I2C
+class Lcd1602rus_hw : public IDisplay
 {
   public:
     Lcd1602rus_hw(uint8_t addr, uint8_t cols, uint8_t rows)
-      : LiquidCrystal_I2C(addr, cols, rows)
+      : _lcd(addr, cols, rows), _cols(cols), _rows(rows)
     {}
 
+    void begin() override
+    {
+      _lcd.begin(_cols, _rows);
+    }
+
+    void blink() override
+    {
+      _lcd.blink();
+    }
+
+    void noBlink() override
+    {
+      _lcd.noBlink();
+    }
+
+    void cursor() override
+    {
+      _lcd.cursor();
+    }
+
+    void noCursor() override
+    {
+      _lcd.noCursor();
+    }
+
+    void scrollDisplayRight() override
+    {
+      _lcd.scrollDisplayRight();
+    }
+    void scrollDisplayLeft() override
+    {
+      _lcd.scrollDisplayLeft();
+    }
+
+    void setCursor(uint8_t c, uint8_t r) override
+    {
+      _lcd.setCursor(c, r);
+    }
+
+    void clear() override
+    {
+      _lcd.clear();
+    }
+
+    void createChar(uint8_t addr, uint8_t* sym) override
+    {
+      _lcd.createChar(addr, sym);
+    }
+
+    void write(uint8_t addr) override
+    {
+      _lcd.write(addr);
+    }
+
+    void print(uint8_t num, int base) override
+    {
+      (void)_lcd.print(num, base);
+    }
+
+    void print(uint16_t num, int base) override
+    {
+      (void)_lcd.print(num, base);
+    }
+
+
+    void print(double num, int digits) override
+    {
+      (void)_lcd.print(num, digits);
+    }
+
     // Перехватываем строку целиком
-    void print(const char* str)
+    void print(const char* str) override
     {
       while (*str)
       {
@@ -20,7 +91,7 @@ class Lcd1602rus_hw : public LiquidCrystal_I2C
         {
           // ASCII
           code = (uint8_t) * str++;
-          LiquidCrystal_I2C::write((uint8_t)code);
+          _lcd.write((uint8_t)code);
           continue;
         }
         else if (((uint8_t)*str & 0xE0) == 0xC0)
@@ -43,17 +114,68 @@ class Lcd1602rus_hw : public LiquidCrystal_I2C
           str++; continue; // битый байт — пропускаем
         }
 
-        LiquidCrystal_I2C::write(convert(code));
+        _lcd.write(convert(code));
       }
     }
 
-    template <typename T> 
-    void print(T val, int base)
+    void printChar(uint16_t code) override
     {
-      LiquidCrystal_I2C::print(val, base);
+      if (code < 0x80)
+      {
+        _lcd.write((uint8_t)code);           // ASCII как есть
+      }
+      else
+      {
+        _lcd.write(convert(code));           // кириллица -> код знакогенератора
+      }
+    }
+
+    // Возвращает количество байт, которое занял символ (1..3), либо 0,
+    // если строка закончилась или байт битый.
+    // Удобно для машинки: печатаем по одному символу, двигая индекс.
+    uint8_t printUtf8Char(const char* str, uint16_t byteIndex) override
+    {
+      const uint8_t* p = (const uint8_t*)str + byteIndex;
+
+      if (*p == 0) return 0;
+
+      uint16_t code = 0;
+      uint8_t  len  = 0;
+
+      if (*p < 0x80)
+      {
+        code = *p;
+        len  = 1;
+      }
+      else if ((*p & 0xE0) == 0xC0)
+      {
+        if ((p[1] & 0xC0) != 0x80) return 0;   // битый UTF-8
+        code = ((uint16_t)(p[0] & 0x1F) << 6) |
+               (uint16_t)(p[1] & 0x3F);
+        len = 2;
+      }
+      else if ((*p & 0xF0) == 0xE0)
+      {
+        if ((p[1] & 0xC0) != 0x80 || (p[2] & 0xC0) != 0x80) return 0;
+        code = ((uint16_t)(p[0] & 0x0F) << 12) |
+               ((uint16_t)(p[1] & 0x3F) << 6) |
+               (uint16_t)(p[2] & 0x3F);
+        len = 3;
+      }
+      else
+      {
+        return 0;                               // битый байт
+      }
+
+      printChar(code);
+      return len;
     }
 
   private:
+
+    LiquidCrystal_I2C _lcd;
+    const uint8_t _cols;
+    const uint8_t _rows;
 
     uint8_t convert(const uint16_t utf16)
     {

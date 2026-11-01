@@ -5,7 +5,7 @@
 namespace Godfather
 {
 	
-static constexpr uint16_t Tempo = 1850U;
+static constexpr uint16_t Tempo = 100U;
 #undef N
 #define N(note, dur) CreateNote(note, dur, Tempo)
 

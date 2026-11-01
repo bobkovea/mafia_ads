@@ -6,18 +6,28 @@ static constexpr uint8_t CardReaderDataPin = 2;
 static constexpr uint8_t BuzzerPin = 3;
 static constexpr uint8_t CardReaderPowerPin = 4;
 static constexpr uint8_t BacklightPin = 9;
+static constexpr uint8_t VbatPin = A0;
+static constexpr uint16_t VccMv = (uint16_t)5050U; // вольметром
 static constexpr uint8_t LcdI2cAddress = 0x27;
 static constexpr uint8_t LcdRowsCount = 2;
 static constexpr uint8_t LcdColsCount = 16;
 
 // ============ Прототипы действий ============
+void StartGoodCardIndication();
+void StartBadCardIndication();
+void StartSlotMachine();
 void StartEnding();
-void StartCard();
+void StartIdle();
 
 // ============ Таблица переходов ============
 const Transition transitions[] = {
-  { State::Card, (uint8_t)Event::CardDetected, State::Ending, StartEnding },
-  { State::Ending, (uint8_t)Event::EndingFinished, State::Card, StartCard },
+  { State::Idle, (uint8_t)Event::GoodCardDetected, State::GoodCardIndication, StartGoodCardIndication },
+  { State::Idle, (uint8_t)Event::BadCardDetected, State::BadCardIndication, StartBadCardIndication },
+ // { State::GoodCardIndication, (uint8_t)Event::CardIndicationFinished, State::SlotMachine, StartSlotMachine },
+   { State::GoodCardIndication, (uint8_t)Event::CardIndicationFinished, State::Ending, StartEnding }, //todo test
+  { State::BadCardIndication, (uint8_t)Event::CardIndicationFinished, State::Idle, StartIdle },
+  { State::SlotMachine, (uint8_t)Event::SlotMachineFinished, State::Ending, StartEnding },
+  { State::Ending, (uint8_t)Event::EndingFinished, State::Idle, StartIdle }
 };
 
 static constexpr uint8_t TransitionsCount = sizeof(transitions) / sizeof(transitions[0]);
