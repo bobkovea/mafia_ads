@@ -5,7 +5,7 @@
 namespace PinkPanther
 {
 	
-static constexpr uint16_t Tempo = 100U;
+static constexpr uint16_t Tempo = 1650U;
 #undef N
 #define N(note, dur) CreateNote(note, dur, Tempo)
 

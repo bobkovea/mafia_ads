@@ -2,12 +2,13 @@
 #include <avr/sleep.h>
 #include "screens/typingscreen.h"
 #include "screens/arrowscreen.h"
+#include "screens/batteryscreen.h"
 #include "screenhandler.h"
 #include "lcd1602rus_hw.h"
 #include "backlight.h"
 #include "backlighttransition.h"
 #include "shifttransition.h"
-#include "vbatmanager.h"
+#include "batterymanager.h"
 
 #include "statemachine.h"
 #include "rolemanager.h"
@@ -18,11 +19,11 @@
 
 //SoftwareSerial rfid(CardReaderDataPin, CardReaderDataPin);
 //RoleManager roleManager;
-//MusicPlayer<BuzzerPin> musicPlayer;
+MusicPlayer<BuzzerPin> musicPlayer;
 //CardHandler cardHandler(rfid);
 //CardStorage cardStorage;
 
-VbatManager<VbatPin, VccMv> vbatManager;
+BatteryManager<VbatPin, VccMv> batteryManager;
 Lcd1602rus_hw lcd(LcdI2cAddress, LcdColsCount, LcdRowsCount);
 
 ShiftTransition shiftTransition(lcd);
@@ -48,7 +49,7 @@ ScreenItem idleScreenItems[] =
   { &arrowScreen, ArrowScreenDurationMs },
 };
 static constexpr uint8_t IdleScreenCount = sizeof(idleScreenItems) / sizeof(idleScreenItems[0]);
-static constexpr uint32_t IdleScreensetDurationMs = 30000U;
+static constexpr uint32_t IdleScreensetDurationMs = 20000U;
 
 Screenset idleScreenset =
 {
@@ -77,7 +78,7 @@ ScreenItem endingScreenItems[] =
 
 static constexpr uint8_t EndingScreenCount = sizeof(endingScreenItems) / sizeof(endingScreenItems[0]);
 
-static constexpr uint32_t EndingScreensetDurationMs = 30000U;
+static constexpr uint32_t EndingScreensetDurationMs = 20000U;
 
 Screenset endingScreenset =
 {
@@ -87,8 +88,123 @@ Screenset endingScreenset =
   &shiftTransition
 };
 
+static constexpr uint32_t BatteryScreenTypingPeriodMs = 120U;
+BatteryScreen batteryScreen(lcd, batteryManager);
+
+static constexpr uint32_t BatteryScreenDurationMs = 20000U;
+
+ScreenItem batteryScreenItems[] =
+{
+  { &batteryScreen, BatteryScreenDurationMs }
+};
+
+static constexpr uint8_t BatteryScreenCount = sizeof(batteryScreenItems) / sizeof(batteryScreenItems[0]);
+static constexpr uint32_t BatteryScreensetDurationMs = 5000U;
+
+Screenset batteryScreenset =
+{
+  batteryScreenItems,
+  BatteryScreenCount,
+  BatteryScreensetDurationMs,
+  &backlightTransition // dummy
+};
+
 ScreenHandler screenHandler(&idleScreenset);
 StateMachine stateMachine(transitions, TransitionsCount, State::Idle);
+
+void setup()
+{
+  randomSeed(analogRead(A0));
+  pinMode(BuzzerPin, OUTPUT);
+  //  pinMode(CardReaderPowerPin, OUTPUT);
+  //  digitalWrite(CardReaderPowerPin, HIGH);
+  pinMode(BacklightPin, OUTPUT);
+  digitalWrite(BacklightPin, HIGH);
+  lcd.begin();
+  screenHandler.Begin();
+}
+
+void loop()
+{
+  const State currentState = stateMachine.Process();
+  const uint32_t now = millis(); // todo какой-то баг с порядком millis
+  HandleState(currentState, now);
+  batteryManager.Tick(now);
+}
+
+void HandleState(const State state, const uint32_t now)
+{
+  switch (state)
+  {
+    case State::Idle:
+      screenHandler.Handle(now);
+      if (screenHandler.IsGroupFinished())
+      {
+        stateMachine.TriggerEvent(Event::GoodCardDetected);
+        // stateMachine.TriggerEvent(Event::BatteryIndicationRequested);
+      }
+      break;
+
+    case State::BatteryIndication:
+      screenHandler.Handle(now);
+      if (screenHandler.IsGroupFinished())
+      {
+        stateMachine.TriggerEvent(Event::BatteryIndicationFinished);
+      }
+      break;
+
+    case State::GoodCardIndication:
+      musicPlayer.Loop();
+      backlight.TickDiscrete(now);
+      if (backlight.IsDiscreteEnded() && musicPlayer.IsFinished())
+      {
+        stateMachine.TriggerEvent(Event::CardIndicationFinished);
+      }
+      break;
+
+    case State::Ending:
+      screenHandler.Handle(now);
+      musicPlayer.Loop();
+      if (screenHandler.IsGroupFinished() && musicPlayer.IsFinished())
+      {
+        stateMachine.TriggerEvent(Event::EndingFinished);
+      }
+      break;
+  }
+}
+
+void StartGoodCardIndication()
+{
+  musicPlayer.PlayBeep();
+  backlight.ResetDiscrete();
+  backlight.SetTotalDicsreteCycles(5U);
+}
+
+void StartBadCardIndication()
+{
+
+}
+
+void StartSlotMachine()
+{
+
+}
+
+void StartEnding()
+{
+  musicPlayer.PlayRole(MafiaRole::Don);
+  screenHandler.SetScreenset(&endingScreenset);
+}
+void StartIdle()
+{
+  screenHandler.SetScreenset(&idleScreenset);
+}
+
+void StartBatteryIndication()
+{
+  screenHandler.SetScreenset(&batteryScreenset);
+}
+
 
 //void StartEnding()
 //{
@@ -123,79 +239,6 @@ StateMachine stateMachine(transitions, TransitionsCount, State::Idle);
 //  rfid.begin(9600);
 //}
 
-void setup()
-{
-  randomSeed(analogRead(A0));
-  //  pinMode(BuzzerPin, OUTPUT);
-  //  pinMode(CardReaderPowerPin, OUTPUT);
-  //  digitalWrite(CardReaderPowerPin, HIGH);
-  pinMode(BacklightPin, OUTPUT);
-  digitalWrite(BacklightPin, HIGH);
-  lcd.begin();
-  screenHandler.Begin();
-}
-
-void loop()
-{
-  const State currentState = stateMachine.Process();
-  HandleState(currentState);
-}
-
-void HandleState(const State state)
-{
-  const uint32_t now = millis();
-
-  switch (state)
-  {
-    case State::Idle:
-      screenHandler.Handle(now);
-      if (screenHandler.IsGroupFinished())
-      {
-        stateMachine.TriggerEvent(Event::GoodCardDetected);
-      }
-      break;
-
-
-    case State::GoodCardIndication:
-      backlight.TickDiscrete(now);
-      if (backlight.IsDiscreteEnded())
-      {
-        stateMachine.TriggerEvent(Event::CardIndicationFinished);
-      }
-      break;
-
-    case State::Ending:
-      screenHandler.Handle(now);
-      if (screenHandler.IsGroupFinished())
-      {
-        stateMachine.TriggerEvent(Event::EndingFinished);
-      }
-      break;
-  }
-}
-
-void StartGoodCardIndication()
-{
-  backlight.ResetDiscrete();
-  backlight.SetTotalDicsreteCycles(4U);
-}
-
-void StartBadCardIndication()
-{
-
-}
-void StartSlotMachine()
-{
-
-}
-void StartEnding()
-{
-  screenHandler.SetScreenset(&endingScreenset);
-}
-void StartIdle()
-{
-  screenHandler.SetScreenset(&idleScreenset);
-}
 
 //
 //void HandleState(const State state)

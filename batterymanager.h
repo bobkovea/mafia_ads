@@ -1,33 +1,35 @@
 #pragma once
 
+#include "contracts/ibatterymanager.h"
+
 template<uint8_t vbatPin, uint16_t vccMv>
-class VbatManager
+class BatteryManager : public IBatteryManager
 {
   public:
-    void Tick(const uint32_t now)
+    void Tick(const uint32_t now) override
     {
       if (now - _vbatLastTimeMs >= VbatPeriodMs)
       {
         _vbatLastTimeMs = now;
         MeasureVbat();
       }
-
-      if (now - _vbatRateLastTimeMs >= VbatRatePeriodMs)
-      {
-        _vbatRateLastTimeMs = now;
-        CalculateVbatRate();
-      }
+      //
+      //      if (now - _vbatRateLastTimeMs >= VbatRatePeriodMs)
+      //      {
+      //        _vbatRateLastTimeMs = now;
+      //        CalculateVbatRate();
+      //      }
     }
 
-    float GetVbat()
+    float GetVbat() override
     {
       return _vbatFiltered;
     }
 
-    float GetVbatRate()
-    {
-      return _vbatRate;
-    }
+    //    float GetVbatRate()
+    //    {
+    //      return _vbatRate;
+    //    }
 
   private:
     static constexpr uint32_t VbatPeriodMs = 1000U;

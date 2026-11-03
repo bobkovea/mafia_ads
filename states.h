@@ -4,6 +4,7 @@
 enum class State : uint8_t
 {
   Idle,
+  BatteryIndication,
   GoodCardIndication,
   BadCardIndication,
   SlotMachine,
@@ -18,7 +19,9 @@ enum class Event : uint8_t
   BadCardDetected = 0x02,
   CardIndicationFinished = 0x04,
   SlotMachineFinished = 0x08,
-  EndingFinished = 0x10
+  EndingFinished = 0x10,
+  BatteryIndicationRequested = 0x20,
+  BatteryIndicationFinished = 0x40
 };
 
 // ============ Прототип действия ============

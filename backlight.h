@@ -89,5 +89,5 @@ class Backlight : public IBacklight
     static constexpr uint8_t MinBrightness = 0;
     static constexpr uint8_t BrightnessStep = 10;
     static constexpr uint8_t AnalogTickPeriodMs = 20;
-    static constexpr uint32_t DiscreteTickPeriodMs = 150U;
+    static constexpr uint32_t DiscreteTickPeriodMs = 100U;
 };
