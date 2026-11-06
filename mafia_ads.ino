@@ -17,12 +17,11 @@
 #include "cardhandler.h"
 #include "cardstorage.h"
 
-//SoftwareSerial rfid(CardReaderDataPin, CardReaderDataPin);
+SoftwareSerial rfid(CardReaderDataPin, CardReaderDataPin);
+CardHandler cardHandler(rfid);
+//CardStorage cardStorage;
 //RoleManager roleManager;
 MusicPlayer<BuzzerPin> musicPlayer;
-//CardHandler cardHandler(rfid);
-//CardStorage cardStorage;
-
 BatteryManager<VbatPin, VccMv> batteryManager;
 Lcd1602rus_hw lcd(LcdI2cAddress, LcdColsCount, LcdRowsCount);
 
@@ -49,7 +48,7 @@ ScreenItem idleScreenItems[] =
   { &arrowScreen, ArrowScreenDurationMs },
 };
 static constexpr uint8_t IdleScreenCount = sizeof(idleScreenItems) / sizeof(idleScreenItems[0]);
-static constexpr uint32_t IdleScreensetDurationMs = 20000U;
+static constexpr uint32_t IdleScreensetDurationMs = UINT32_MAX;
 
 Screenset idleScreenset =
 {
@@ -116,12 +115,13 @@ void setup()
 {
   randomSeed(analogRead(A0));
   pinMode(BuzzerPin, OUTPUT);
-  //  pinMode(CardReaderPowerPin, OUTPUT);
-  //  digitalWrite(CardReaderPowerPin, HIGH);
+  pinMode(CardReaderPowerPin, OUTPUT);
+  digitalWrite(CardReaderPowerPin, HIGH);
   pinMode(BacklightPin, OUTPUT);
   digitalWrite(BacklightPin, HIGH);
   lcd.begin();
   screenHandler.Begin();
+  rfid.begin(9600);
 }
 
 void loop()
@@ -129,7 +129,7 @@ void loop()
   const State currentState = stateMachine.Process();
   const uint32_t now = millis(); // todo какой-то баг с порядком millis
   HandleState(currentState, now);
-  batteryManager.Tick(now);
+  //  batteryManager.Tick(now);
 }
 
 void HandleState(const State state, const uint32_t now)
@@ -137,11 +137,13 @@ void HandleState(const State state, const uint32_t now)
   switch (state)
   {
     case State::Idle:
-      screenHandler.Handle(now);
-      if (screenHandler.IsGroupFinished())
       {
-        stateMachine.TriggerEvent(Event::GoodCardDetected);
-        // stateMachine.TriggerEvent(Event::BatteryIndicationRequested);
+        screenHandler.Handle(now);
+        const bool isCardFound = cardHandler.Handle();
+        if (isCardFound)
+        {
+          stateMachine.TriggerEvent(Event::GoodCardDetected);
+        }
       }
       break;
 
@@ -162,6 +164,12 @@ void HandleState(const State state, const uint32_t now)
       }
       break;
 
+    case State::BadCardIndication:
+      break;
+      
+    case State::SlotMachine:
+      break;
+
     case State::Ending:
       screenHandler.Handle(now);
       musicPlayer.Loop();
@@ -178,11 +186,13 @@ void StartGoodCardIndication()
   musicPlayer.PlayBeep();
   backlight.ResetDiscrete();
   backlight.SetTotalDicsreteCycles(5U);
+  rfid.end();
 }
 
 void StartBadCardIndication()
 {
-
+  rfid.end();
+  musicPlayer.PlayOops();
 }
 
 void StartSlotMachine()
@@ -197,6 +207,8 @@ void StartEnding()
 }
 void StartIdle()
 {
+  cardHandler.Prepare();
+  rfid.begin(9600);
   screenHandler.SetScreenset(&idleScreenset);
 }
 
@@ -208,14 +220,8 @@ void StartBatteryIndication()
 
 //void StartEnding()
 //{
-//  musicPlayer.PlayBeep();
+
 //
-//  do
-//  {
-//    musicPlayer.Loop();
-//  } while (!musicPlayer.IsFinished());
-//
-//  rfid.end();
 //
 //  pwmManager.ResetPwm();
 //  lcdManager.ClearDisplay();

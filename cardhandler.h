@@ -7,7 +7,6 @@ class CardHandler
     CardHandler(SoftwareSerial& rfid) :
       _rfid(rfid)
     {
-      rfid.begin(9600);
     }
 
     void Prepare()

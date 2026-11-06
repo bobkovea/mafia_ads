@@ -57,6 +57,6 @@ class StateMachine
   private:
     const Transition* mTransitions;
     uint8_t mTransitionsCount;
-    volatile State mCurrentState;
-    volatile uint8_t mEvents;
+    State mCurrentState;
+    uint8_t mEvents;
 };

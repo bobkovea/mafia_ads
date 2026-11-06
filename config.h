@@ -27,7 +27,7 @@ const Transition transitions[] =
   { State::Idle, (uint8_t)Event::BadCardDetected, State::BadCardIndication, StartBadCardIndication },
   { State::Idle, (uint8_t)Event::BatteryIndicationRequested, State::BatteryIndication, StartBatteryIndication },
   { State::BatteryIndication, (uint8_t)Event::BatteryIndicationFinished, State::Idle, StartIdle },
-  { State::BatteryIndication, (uint8_t)Event::GoodCardIndication, State::SlotMachine, StartSlotMachine },
+//  { State::BatteryIndication, (uint8_t)Event::GoodCardIndication, State::SlotMachine, StartSlotMachine },
   // { State::GoodCardIndication, (uint8_t)Event::CardIndicationFinished, State::SlotMachine, StartSlotMachine },
   { State::GoodCardIndication, (uint8_t)Event::CardIndicationFinished, State::Ending, StartEnding }, //todo test
   { State::BadCardIndication, (uint8_t)Event::CardIndicationFinished, State::Idle, StartIdle },

@@ -69,13 +69,14 @@ class TypingScreen : public IScreen
 	private:
 
 	IDisplay& _lcd;
+	const char* _text;
 	uint32_t _baseTextTypePeriodMs;
 	uint32_t _currentTextTypePeriodMs;
+	
 	uint32_t _lastUptimeMs = 0U;
 	uint8_t _col = 0;
 	uint8_t _row = 0;
 	uint8_t _byteIndex = 0;
-	const char* _text;
 	bool _isFinished = false;
 	static constexpr uint32_t PauseAfterFilledScreenMs = 1000U;
 };

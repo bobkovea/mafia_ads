@@ -8,11 +8,6 @@ class BacklightTransition : public ITransition
   public:
     explicit BacklightTransition(IBacklight& backlight) : _backlight(backlight) {}
 
-    void Start(const uint32_t now) override
-    {
-      // Если у Backlight есть метод сброса — вызвать здесь.
-    }
-
     void Tick(const uint32_t now, const TransitionPhase phase) override
     {
       _backlight.TickAnalog(now, phase == TransitionPhase::FadeIn);

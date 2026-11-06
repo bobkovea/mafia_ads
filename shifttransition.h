@@ -17,6 +17,7 @@ class ShiftTransition : public ITransition
 
     void Tick(const uint32_t now, const TransitionPhase phase) override
     {
+		(void)phase;
       if (!_isFinished)
       {
         if (now - _lastShiftMs >= ShiftPeriodMs)

@@ -9,5 +9,6 @@ public:
 	
 	virtual void Tick(const uint32_t uptime)
 	{
+		(void)uptime;
 	}
 };

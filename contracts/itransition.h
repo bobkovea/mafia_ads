@@ -12,7 +12,10 @@ class ITransition
 {
   public:
     // Запустить анимацию (сбросить внутреннее состояние).
-    virtual void Start(const uint32_t now) = 0;
+    virtual void Start(const uint32_t now)
+	{
+		(void)now;
+	};
 
     // Продвинуть анимацию. phase говорит, в какую сторону идём.
     virtual void Tick(const uint32_t now, const TransitionPhase phase) = 0;

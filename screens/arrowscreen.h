@@ -67,20 +67,23 @@ class ArrowScreen : public IScreen
 	IDisplay& _lcd;
 	const char* _text0;
 	const char* _text1;
+	const char* _currentText;
+	uint32_t _baseTextTypePeriodMs;
+	uint32_t _currentTextTypePeriodMs;
+	
 	static constexpr uint32_t TextPeriodMs = 4000U;
 	static constexpr uint32_t ArrowsBlinkPeriodMs = 400U;
 	
 	bool _arrowState = false;
 	uint32_t _lastArrowsUpdateMs = 0U;
 		
-	uint32_t _baseTextTypePeriodMs;
-	uint32_t _currentTextTypePeriodMs;
+
 	uint32_t _lastTextTypeMs = 0U;
 	uint8_t _col = 0U;
 	uint8_t _byteIndex = 0U;
 	
 	uint32_t _lastTextChangeMs = 0U;
-	const char* _currentText;
+
 	
 	uint8_t ArrowDown0[8] =
     {
