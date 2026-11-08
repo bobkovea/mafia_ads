@@ -2,11 +2,12 @@
 
 #include "../contracts/idisplay.h"
 #include "../contracts/iscreen.h"
-
+#include "../utils/flashstring.h"
+	
 class ArrowScreen : public IScreen
 {
 	public:
-	ArrowScreen(IDisplay& lcd, const char* text0, const char* text1, const uint32_t typingPeriod) 
+	ArrowScreen(IDisplay& lcd, const __FlashStringHelper* text0, const __FlashStringHelper* text1, const uint32_t typingPeriod) 
 	: _lcd(lcd), 
 	_text0(text0),
 	_text1(text1),
@@ -48,15 +49,15 @@ class ArrowScreen : public IScreen
 			_byteIndex = 0U;
 			_currentText = _currentText == _text0 ? _text1 : _text0;
 			_lcd.setCursor(0, 0);
-			_lcd.print("                ");
+			_lcd.print(F("                "));
 		}
 		
-		if (_currentText[_byteIndex] != 0 && (now - _lastTextTypeMs >= _currentTextTypePeriodMs))
+		if (FlashCharAt(_currentText, _byteIndex) != 0 && (now - _lastTextTypeMs >= _currentTextTypePeriodMs))
 		{
 			_lastTextTypeMs = now;
 			_currentTextTypePeriodMs = _baseTextTypePeriodMs + random(0, _baseTextTypePeriodMs);
 			_lcd.setCursor(_col, 0);
-			const uint8_t len = _lcd.printUtf8Char(_currentText, _byteIndex);
+			const uint8_t len = _lcd.printUtf8CharFlash(_currentText, _byteIndex);
 			_byteIndex += len;
 			++_col;
 		}
@@ -65,9 +66,9 @@ class ArrowScreen : public IScreen
 	private:
 	
 	IDisplay& _lcd;
-	const char* _text0;
-	const char* _text1;
-	const char* _currentText;
+	const __FlashStringHelper* _text0;
+	const __FlashStringHelper* _text1;
+	const __FlashStringHelper* _currentText;
 	uint32_t _baseTextTypePeriodMs;
 	uint32_t _currentTextTypePeriodMs;
 	

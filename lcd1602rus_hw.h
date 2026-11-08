@@ -1,5 +1,6 @@
 #pragma once
 
+#include <avr/pgmspace.h>
 #include <LiquidCrystal_I2C.h>
 #include "contracts/idisplay.h"
 
@@ -81,42 +82,39 @@ class Lcd1602rus_hw : public IDisplay
     }
 
     // Перехватываем строку целиком
-    void print(const char* str) override
-    {
-      while (*str)
-      {
-        uint16_t code = 0;
+    void print(const __FlashStringHelper* str) override
+	{
+	  const char* p = reinterpret_cast<const char*>(str);
+	  while (true)
+	  {
+		const uint8_t b0 = pgm_read_byte(p);
+		if (b0 == 0) break;
 
-        if ((uint8_t)*str < 0x80)
-        {
-          // ASCII
-          code = (uint8_t) * str++;
-          _lcd.write((uint8_t)code);
-          continue;
-        }
-        else if (((uint8_t)*str & 0xE0) == 0xC0)
-        {
-          // 2-байтовый UTF-8
-          code = ((uint16_t)(*str & 0x1F) << 6) |
-                 (uint16_t)(*(str + 1) & 0x3F);
-          str += 2;
-        }
-        else if (((uint8_t)*str & 0xF0) == 0xE0)
-        {
-          // 3-байтовый UTF-8
-          code = ((uint16_t)(*str & 0x0F) << 12) |
-                 ((uint16_t)(*(str + 1) & 0x3F) << 6) |
-                 (uint16_t)(*(str + 2) & 0x3F);
-          str += 3;
-        }
-        else
-        {
-          str++; continue; // битый байт — пропускаем
-        }
+		uint16_t code = 0;
+		uint8_t  len  = 0;
 
-        _lcd.write(convert(code));
-      }
-    }
+		if (b0 < 0x80) { code = b0; len = 1; }
+		else if ((b0 & 0xE0) == 0xC0) {
+		  const uint8_t b1 = pgm_read_byte(p + 1);
+		  if ((b1 & 0xC0) != 0x80) { p++; continue; }
+		  code = ((uint16_t)(b0 & 0x1F) << 6) | (uint16_t)(b1 & 0x3F);
+		  len = 2;
+		}
+		else if ((b0 & 0xF0) == 0xE0) {
+		  const uint8_t b1 = pgm_read_byte(p + 1);
+		  const uint8_t b2 = pgm_read_byte(p + 2);
+		  if ((b1 & 0xC0) != 0x80 || (b2 & 0xC0) != 0x80) { p++; continue; }
+		  code = ((uint16_t)(b0 & 0x0F) << 12) |
+				 ((uint16_t)(b1 & 0x3F) << 6)  |
+				 (uint16_t)(b2 & 0x3F);
+		  len = 3;
+		}
+		else { p++; continue; }
+
+		p += len;
+		printChar(code);
+	  }
+	}
 
     void printChar(uint16_t code) override
     {
@@ -133,43 +131,37 @@ class Lcd1602rus_hw : public IDisplay
     // Возвращает количество байт, которое занял символ (1..3), либо 0,
     // если строка закончилась или байт битый.
     // Удобно для машинки: печатаем по одному символу, двигая индекс.
-    uint8_t printUtf8Char(const char* str, uint16_t byteIndex) override
-    {
-      const uint8_t* p = (const uint8_t*)str + byteIndex;
+	uint8_t printUtf8CharFlash(const __FlashStringHelper* str, uint16_t byteIndex) override
+	{
+	  const char* p = reinterpret_cast<const char*>(str) + byteIndex;
 
-      if (*p == 0) return 0;
+	  const uint8_t b0 = pgm_read_byte(p);
+	  if (b0 == 0) return 0;
 
-      uint16_t code = 0;
-      uint8_t  len  = 0;
+	  uint16_t code = 0;
+	  uint8_t  len  = 0;
 
-      if (*p < 0x80)
-      {
-        code = *p;
-        len  = 1;
-      }
-      else if ((*p & 0xE0) == 0xC0)
-      {
-        if ((p[1] & 0xC0) != 0x80) return 0;   // битый UTF-8
-        code = ((uint16_t)(p[0] & 0x1F) << 6) |
-               (uint16_t)(p[1] & 0x3F);
-        len = 2;
-      }
-      else if ((*p & 0xF0) == 0xE0)
-      {
-        if ((p[1] & 0xC0) != 0x80 || (p[2] & 0xC0) != 0x80) return 0;
-        code = ((uint16_t)(p[0] & 0x0F) << 12) |
-               ((uint16_t)(p[1] & 0x3F) << 6) |
-               (uint16_t)(p[2] & 0x3F);
-        len = 3;
-      }
-      else
-      {
-        return 0;                               // битый байт
-      }
+	  if (b0 < 0x80) { code = b0; len = 1; }
+	  else if ((b0 & 0xE0) == 0xC0) {
+		const uint8_t b1 = pgm_read_byte(p + 1);
+		if ((b1 & 0xC0) != 0x80) return 0;
+		code = ((uint16_t)(b0 & 0x1F) << 6) | (uint16_t)(b1 & 0x3F);
+		len = 2;
+	  }
+	  else if ((b0 & 0xF0) == 0xE0) {
+		const uint8_t b1 = pgm_read_byte(p + 1);
+		const uint8_t b2 = pgm_read_byte(p + 2);
+		if ((b1 & 0xC0) != 0x80 || (b2 & 0xC0) != 0x80) return 0;
+		code = ((uint16_t)(b0 & 0x0F) << 12) |
+			   ((uint16_t)(b1 & 0x3F) << 6)  |
+			   (uint16_t)(b2 & 0x3F);
+		len = 3;
+	  }
+	  else return 0;
 
-      printChar(code);
-      return len;
-    }
+	  printChar(code);
+	  return len;
+	}
 
   private:
 

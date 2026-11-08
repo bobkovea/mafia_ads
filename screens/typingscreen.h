@@ -2,11 +2,12 @@
 
 #include "../contracts/idisplay.h"
 #include "../contracts/iscreen.h"
+#include "../utils/flashstring.h"
 
 class TypingScreen : public IScreen
 {
 	public:
-	TypingScreen(IDisplay& lcd, const char* text, const uint32_t typingPeriod) :
+	TypingScreen(IDisplay& lcd, const __FlashStringHelper* text, const uint32_t typingPeriod) :
 	_lcd(lcd),
 	_text(text), 
 	_baseTextTypePeriodMs(typingPeriod),
@@ -40,7 +41,7 @@ class TypingScreen : public IScreen
 			
 			_currentTextTypePeriodMs = _baseTextTypePeriodMs + random(0, _baseTextTypePeriodMs);
 			_lcd.setCursor(_col, _row);
-			const uint8_t len = _lcd.printUtf8Char(_text, _byteIndex);
+			const uint8_t len = _lcd.printUtf8CharFlash(_text, _byteIndex);
 			_byteIndex += len;
 			++_col;
 			if (_col >= 16)
@@ -57,7 +58,7 @@ class TypingScreen : public IScreen
 				}
 			}
 			
-			if(_text[_byteIndex] == 0)
+			if(FlashCharAt(_text, _byteIndex) == 0)
 			{
 				_isFinished = true;
 				_lcd.noCursor();
@@ -69,7 +70,7 @@ class TypingScreen : public IScreen
 	private:
 
 	IDisplay& _lcd;
-	const char* _text;
+	const __FlashStringHelper* _text;
 	uint32_t _baseTextTypePeriodMs;
 	uint32_t _currentTextTypePeriodMs;
 	

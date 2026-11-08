@@ -22,10 +22,10 @@ public:
 		static constexpr float MaxVoltage = 4.2F; // todo 4.2
 		float percent = (vBat - MinVoltage) / (MaxVoltage - MinVoltage) * 100.0F;
 		percent = constrain(percent, 0.0, 100.0);
-		_lcd.print("Уровень заряда:");
+		_lcd.print(F("Уровень заряда:"));
 		_lcd.setCursor(0, 1);
 		_lcd.print((uint8_t)percent);
-		_lcd.print("%");
+		_lcd.print(F("%"));
 	}
 
 private:

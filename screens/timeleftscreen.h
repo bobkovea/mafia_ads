@@ -2,12 +2,13 @@
 
 #include "../contracts/idisplay.h"
 #include "../contracts/iscreen.h"
+#include "../utils/flashstring.h"
 
 class TimeleftScreen : public IScreen
 {
 	public:
 	
-	TimeleftScreen(IDisplay& lcd, const char* text, const uint32_t typingPeriod) 
+	TimeleftScreen(IDisplay& lcd, const __FlashStringHelper* text, const uint32_t typingPeriod) 
 	: _lcd(lcd),
 	_text(text),
 	_baseTextTypePeriodMs(typingPeriod),
@@ -32,12 +33,12 @@ class TimeleftScreen : public IScreen
 			
 		}
 		
-		if (_text[_byteIndex] != 0 && (now - _lastTextTypeMs >= _currentTextTypePeriodMs))
+		if (FlashCharAt(_text, _byteIndex) != 0 && (now - _lastTextTypeMs >= _currentTextTypePeriodMs))
 		{
 			_lastTextTypeMs = now;
 			_currentTextTypePeriodMs = _baseTextTypePeriodMs + random(0, _baseTextTypePeriodMs);
 			_lcd.setCursor(_col, 0);
-			const uint8_t len = _lcd.printUtf8Char(_text, _byteIndex);
+			const uint8_t len = _lcd.printUtf8CharFlash(_text, _byteIndex);
 			_byteIndex += len;
 			++_col;
 		}
@@ -46,7 +47,7 @@ class TimeleftScreen : public IScreen
 	private:
 	
 	IDisplay& _lcd;
-	const char* _text;
+	const __FlashStringHelper* _text;
 	uint32_t _baseTextTypePeriodMs;
 	uint32_t _currentTextTypePeriodMs;
 	

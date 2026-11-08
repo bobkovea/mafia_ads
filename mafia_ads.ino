@@ -18,6 +18,7 @@
 #include "card/cardreader.h"
 #include "card/cardstorage.h"
 #include "card/cardcontroller.h"
+#include "utils/flashstring.h"
 
 //RoleManager roleManager;
 
@@ -40,9 +41,15 @@ static constexpr uint32_t IdleScreen0TypingPeriodMs = 120U;
 static constexpr uint32_t IdleScreen1TypingPeriodMs = 120U;
 static constexpr uint32_t ArrowScreenTypingPeriodMs = 60U;
 
-TypingScreen idleScreen0(lcd, "Клуб \"Утопия\"   представляет...", IdleScreen0TypingPeriodMs);
-TypingScreen idleScreen1(lcd, " Интерактивная   игра \"Мафия\"", IdleScreen1TypingPeriodMs);
-ArrowScreen arrowScreen(lcd, "Приложи пропуск ", "Узнай свою роль!", ArrowScreenTypingPeriodMs);
+static const char IdleText0[] PROGMEM = "Клуб \"Утопия\"   представляет...";
+static const char IdleText1[] PROGMEM = " Интерактивная   игра \"Мафия\"";
+static const char ArrowText0[] PROGMEM = "Приложи пропуск ";
+static const char ArrowText1[] PROGMEM = "Узнай свою роль!";
+
+TypingScreen idleScreen0(lcd, FPSTR(IdleText0), IdleScreen0TypingPeriodMs);
+TypingScreen idleScreen1(lcd, FPSTR(IdleText1), IdleScreen1TypingPeriodMs);
+ArrowScreen arrowScreen(lcd, FPSTR(ArrowText0), 
+  FPSTR(ArrowText1), ArrowScreenTypingPeriodMs);
 
 static constexpr uint32_t IdleScreen0DurationMs = 7000U;
 static constexpr uint32_t IdleScreen1DurationMs = 7000U;
@@ -67,9 +74,13 @@ Screenset idleScreenset =
 
 static constexpr uint32_t EndingScreenTypingPeriodMs = 50U;
 
-TypingScreen endingScreen0(lcd, "Запись на игры  в группе ВК:", EndingScreenTypingPeriodMs);
-TypingScreen endingScreen1(lcd, "  vk.com/         mafiautopia", EndingScreenTypingPeriodMs);
-TypingScreen endingScreen2(lcd, "Кафе \"ЧЧ Лаунж\" пр.Ленина, 71а", EndingScreenTypingPeriodMs);
+static const char EndingText0[] PROGMEM = "Запись на игры  в группе ВК:";
+static const char EndingText1[] PROGMEM = "  vk.com/         mafiautopia";
+static const char EndingText2[] PROGMEM = "Кафе \"ЧЧ Лаунж\" пр.Ленина, 71а";
+
+TypingScreen endingScreen0(lcd, FPSTR(EndingText0), EndingScreenTypingPeriodMs);
+TypingScreen endingScreen1(lcd, FPSTR(EndingText1), EndingScreenTypingPeriodMs);
+TypingScreen endingScreen2(lcd, FPSTR(EndingText2), EndingScreenTypingPeriodMs);
 
 static constexpr uint32_t EndingScreen0DurationMs = 4000U;
 static constexpr uint32_t EndingScreen1DurationMs = 8000U;

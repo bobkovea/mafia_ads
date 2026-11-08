@@ -11,13 +11,15 @@ class IDisplay
     virtual void print(uint8_t num, int base = 10) = 0;
     virtual void print(uint16_t num, int base = 10) = 0;
     virtual void print(double num, int digits = 2) = 0;
-    virtual void print(const char* str) = 0;
+	virtual void print(const __FlashStringHelper* str) = 0;
+	virtual uint8_t printUtf8CharFlash(const __FlashStringHelper* str, uint16_t byteIndex) = 0;
 	virtual void printChar(uint16_t code) = 0;;
-	virtual uint8_t printUtf8Char(const char* str, uint16_t byteIndex) = 0;
 	virtual void blink() = 0;
 	virtual void noBlink() = 0;
 	virtual void cursor() = 0;
 	virtual void noCursor() = 0;
 	virtual void scrollDisplayRight() = 0;
 	virtual void scrollDisplayLeft() = 0;
+	
+
 };

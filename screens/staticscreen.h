@@ -6,7 +6,7 @@
 class StaticScreen : public IScreen
 {
 	public:
-	StaticScreen(IDisplay& lcd, const char* row0, const char* row1) 
+	StaticScreen(IDisplay& lcd, const __FlashStringHelper* row0, const __FlashStringHelper* row1) 
 	: _lcd(lcd), _row0(row0), _row1(row1)
 	{}
 	
@@ -21,6 +21,6 @@ class StaticScreen : public IScreen
 	
 	private:
 	IDisplay& _lcd;
-	const char* _row0;
-	const char* _row1;
+	const __FlashStringHelper* _row0;
+	const __FlashStringHelper* _row1;
 };
