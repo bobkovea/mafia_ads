@@ -1,8 +1,9 @@
 #include <SoftwareSerial.h>
-#include <avr/sleep.h>
+//#include <avr/sleep.h>
 #include "screens/typingscreen.h"
 #include "screens/arrowscreen.h"
 #include "screens/batteryscreen.h"
+#include "screens/timeleftscreen.h"
 #include "screenhandler.h"
 #include "lcd1602rus_hw.h"
 #include "backlight.h"
@@ -14,13 +15,19 @@
 #include "rolemanager.h"
 #include "config.h"
 #include "musicplayer.h"
-#include "cardhandler.h"
-#include "cardstorage.h"
+#include "card/cardreader.h"
+#include "card/cardstorage.h"
+#include "card/cardcontroller.h"
+
+//RoleManager roleManager;
 
 SoftwareSerial rfid(CardReaderDataPin, CardReaderDataPin);
-CardHandler cardHandler(rfid);
-//CardStorage cardStorage;
-//RoleManager roleManager;
+CardReader cardReader(rfid);
+static constexpr int8_t StorageSize = 32; // максимум пропусков в базе
+static constexpr uint32_t TimeBetweenMs = 86400000U; // 24 часа
+CardStorage<StorageSize, TimeBetweenMs> cardStorage;
+CardController cardController(cardReader, cardStorage);
+
 MusicPlayer<BuzzerPin> musicPlayer;
 BatteryManager<VbatPin, VccMv> batteryManager;
 Lcd1602rus_hw lcd(LcdI2cAddress, LcdColsCount, LcdRowsCount);
@@ -129,7 +136,7 @@ void loop()
   const State currentState = stateMachine.Process();
   const uint32_t now = millis(); // todo какой-то баг с порядком millis
   HandleState(currentState, now);
-  //  batteryManager.Tick(now);
+//  batteryManager.Tick(now);
 }
 
 void HandleState(const State state, const uint32_t now)
@@ -137,21 +144,30 @@ void HandleState(const State state, const uint32_t now)
   switch (state)
   {
     case State::Idle:
-      {
         screenHandler.Handle(now);
-        const bool isCardFound = cardHandler.Handle();
-        if (isCardFound)
+        switch(cardController.Poll(now))
         {
-          stateMachine.TriggerEvent(Event::GoodCardDetected);
+          case UploadStatus::NewCardAdded:
+          case UploadStatus::ExistingCardUpdated:
+            stateMachine.TriggerEvent(Event::GoodCardDetected);
+          break;
+
+          case UploadStatus::ExistingCardTimeleft:
+            stateMachine.TriggerEvent(Event::BadCardDetected);
+          break;
+          
+          case UploadStatus::NoCard:
+          case UploadStatus::StorageIsFull:
+          // todo storage is full screen
+          break;
         }
-      }
       break;
 
     case State::BatteryIndication:
       screenHandler.Handle(now);
       if (screenHandler.IsGroupFinished())
       {
-        stateMachine.TriggerEvent(Event::BatteryIndicationFinished);
+        stateMachine.TriggerEvent(Event::IndicationFinished);
       }
       break;
 
@@ -160,13 +176,18 @@ void HandleState(const State state, const uint32_t now)
       backlight.TickDiscrete(now);
       if (backlight.IsDiscreteEnded() && musicPlayer.IsFinished())
       {
-        stateMachine.TriggerEvent(Event::CardIndicationFinished);
+        stateMachine.TriggerEvent(Event::IndicationFinished);
       }
       break;
 
     case State::BadCardIndication:
+      musicPlayer.Loop();
+      if (musicPlayer.IsFinished())
+      {
+        stateMachine.TriggerEvent(Event::IndicationFinished);
+      }
       break;
-      
+
     case State::SlotMachine:
       break;
 
@@ -175,7 +196,7 @@ void HandleState(const State state, const uint32_t now)
       musicPlayer.Loop();
       if (screenHandler.IsGroupFinished() && musicPlayer.IsFinished())
       {
-        stateMachine.TriggerEvent(Event::EndingFinished);
+        stateMachine.TriggerEvent(Event::IndicationFinished);
       }
       break;
   }
@@ -207,7 +228,7 @@ void StartEnding()
 }
 void StartIdle()
 {
-  cardHandler.Prepare();
+  cardController.Reset();
   rfid.begin(9600);
   screenHandler.SetScreenset(&idleScreenset);
 }
@@ -216,91 +237,3 @@ void StartBatteryIndication()
 {
   screenHandler.SetScreenset(&batteryScreenset);
 }
-
-
-//void StartEnding()
-//{
-
-//
-//
-//  pwmManager.ResetPwm();
-//  lcdManager.ClearDisplay();
-//  roleManager.GenerateRole();
-//
-//  const MafiaRole role = roleManager.GetRole();
-//  musicPlayer.PlayRole(role);
-//  lcdManager.PrintCityFallingAsleep();
-//  while (!pwmManager.SmoothBacklightOff());
-//  lcdManager.ClearDisplay();
-//  delay(2000);
-//  lcdManager.SetEnding(role);
-//  while (!pwmManager.SmoothBacklightOn());
-//}
-//
-//void StartCard()
-//{
-//  lcdManager.ClearDisplay();
-//  lcdManager.PrintIdleMessage();
-//  cardHandler.Prepare();
-//  rfid.begin(9600);
-//}
-
-
-//
-//void HandleState(const State state)
-//{
-//  switch (state)
-//  {
-//    case State::Card:
-//      pwmManager.Breath();
-//      lcdManager.UpdateIdleAnimation();
-//      if (cardHandler.Handle())
-//      {
-//        uint8_t id[5];
-//        cardHandler.GetLastId(id);
-//        const uint32_t timeLeftMs = cardStorage.AddId(id);
-//        if (timeLeftMs == 0U)
-//        {
-//          stateMachine.TriggerEvent(Event::CardDetected);
-//        }
-//        else
-//        {
-//          rfid.end();
-//
-//          musicPlayer.PlayOops();
-//          do
-//          {
-//            musicPlayer.Loop();
-//          } while (!musicPlayer.IsFinished());
-//
-//          pwmManager.ResetPwm();
-//          lcdManager.ClearDisplay();
-//          for (uint8_t i = 0; i < 5; ++i)
-//          {
-//            // переход через ноль
-//            const int32_t timeLeftDisplayed = (int32_t)timeLeftMs - ((int32_t)1000 * (int32_t)i);
-//            lcdManager.PrintTimeLeft(timeLeftDisplayed < 0 ? 0U : (uint32_t)timeLeftDisplayed);
-//            delay(1000);
-//          }
-//
-//          lcdManager.ClearDisplay();
-//          lcdManager.PrintIdleMessage();
-//          cardHandler.Prepare();
-//          rfid.begin(9600);
-//        }
-//      }
-//      break;
-//
-//    case State::Ending:
-//
-//      musicPlayer.Loop();
-//      if (musicPlayer.IsFinished())
-//      {
-//        stateMachine.TriggerEvent(Event::EndingFinished);
-//      }
-//      break;
-//
-//    default:
-//      break;
-//  }
-//}

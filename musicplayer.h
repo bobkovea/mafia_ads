@@ -1,3 +1,4 @@
+// musicplayer.h
 #pragma once
 
 #include <BuzzerMelody.h>
@@ -16,58 +17,44 @@ class MusicPlayer
 
     void PlayBeep()
     {
-      _currentMelody = &_beep;
-      _currentMelody->play();
+      Play(DoorBeep::melody, DoorBeep::melodyLength);
     }
 
     void PlayOops()
     {
-      _currentMelody = &_oops;
-      _currentMelody->play();
+      Play(OopsBeep::melody, OopsBeep::melodyLength);
     }
 
     void PlayRole(const MafiaRole role)
     {
       switch (role)
       {
-        case MafiaRole::Citizen:
-          _currentMelody = &_citizen;
-          break;
-        case MafiaRole::Sheriff:
-          _currentMelody = &_sheriff;
-          break;
-        case MafiaRole::Mafia:
-          _currentMelody = &_mafia;
-          break;
-        case MafiaRole::Don:
-          _currentMelody = &_don;
-          break;
-
-        default:
-          break;
+        case MafiaRole::Citizen: Play(Aha::melody,         Aha::melodyLength);         break;
+        case MafiaRole::Sheriff: Play(Pirates::melody,     Pirates::melodyLength);     break;
+        case MafiaRole::Mafia:   Play(PinkPanther::melody, PinkPanther::melodyLength); break;
+        case MafiaRole::Don:     Play(Godfather::melody,   Godfather::melodyLength);   break;
+        default: break;
       }
-
-      _currentMelody->play();
     }
 
     void Loop()
     {
-      _currentMelody->loop();
+      _player.loop();
     }
 
     bool IsFinished()
     {
-      return _currentMelody->getState() == BuzzerMelody::IDLE;
+      return _player.getState() == BuzzerMelody::IDLE;
     }
 
   private:
 
-    BuzzerMelody _oops = BuzzerMelody(buzzerPin, OopsBeep::melodyLength, OopsBeep::melody);
-    BuzzerMelody _beep = BuzzerMelody(buzzerPin, DoorBeep::melodyLength, DoorBeep::melody);
-    BuzzerMelody _citizen = BuzzerMelody(buzzerPin, Aha::melodyLength, Aha::melody);
-    BuzzerMelody _sheriff = BuzzerMelody(buzzerPin, Pirates::melodyLength, Pirates::melody);
-    BuzzerMelody _mafia = BuzzerMelody(buzzerPin, PinkPanther::melodyLength, PinkPanther::melody);
-    BuzzerMelody _don = BuzzerMelody(buzzerPin, Godfather::melodyLength, Godfather::melody);
+    void Play(const Note* melody, uint16_t length)
+    {
+      _player.stop();
+      _player.loadMelody(length, melody);
+      _player.play();
+    }
 
-    BuzzerMelody* _currentMelody = &_citizen;
+    BuzzerMelody _player = BuzzerMelody(buzzerPin, 0, nullptr);
 };

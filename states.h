@@ -17,11 +17,9 @@ enum class Event : uint8_t
   None = 0x00,
   GoodCardDetected = 0x01,
   BadCardDetected = 0x02,
-  CardIndicationFinished = 0x04,
+  IndicationFinished = 0x04,
   SlotMachineFinished = 0x08,
-  EndingFinished = 0x10,
-  BatteryIndicationRequested = 0x20,
-  BatteryIndicationFinished = 0x40
+  BatteryIndicationRequested = 0x10,
 };
 
 // ============ Прототип действия ============
