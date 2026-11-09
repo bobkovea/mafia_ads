@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../contracts/idisplay.h"
-#include "../contracts/iscreen.h"
+#include "../../contracts/idisplay.h"
+#include "../../contracts/iscreen.h"
 
 class StaticScreen : public IScreen
 {

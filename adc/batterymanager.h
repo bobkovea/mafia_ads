@@ -1,6 +1,6 @@
 #pragma once
 
-#include "contracts/ibatterymanager.h"
+#include "../contracts/ibatterymanager.h"
 
 template<uint8_t vbatPin, uint16_t vccMv>
 class BatteryManager : public IBatteryManager

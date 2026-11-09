@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../contracts/idisplay.h"
-#include "../contracts/iscreen.h"
-#include "../utils/flashstring.h"
+#include "../../contracts/idisplay.h"
+#include "../../contracts/iscreen.h"
+#include "../../contracts/ibatterymanager.h"
+#include "../../utils/flashstring.h"
 
 class TypingScreen : public IScreen
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "contracts/ibacklight.h"
+#include "../contracts/ibacklight.h"
 
 template<uint8_t backlightPin>
 class Backlight : public IBacklight

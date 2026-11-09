@@ -8,7 +8,7 @@
 #include "melodies/aha.h"
 #include "melodies/doorbeep.h"
 #include "melodies/oopsbeep.h"
-#include "rolemanager.h"
+#include "../role/rolemanager.h"
 
 template <uint8_t buzzerPin>
 class MusicPlayer
@@ -25,6 +25,7 @@ class MusicPlayer
       Play(OopsBeep::melody, OopsBeep::melodyLength);
     }
 
+    //TODO сделать свой енум для мелодий, не привязываясь к RoleManager
     void PlayRole(const MafiaRole role)
     {
       switch (role)

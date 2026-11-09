@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../contracts/idisplay.h"
-#include "../contracts/iscreen.h"
-#include "../utils/flashstring.h"
+#include "../../contracts/idisplay.h"
+#include "../../contracts/iscreen.h"
+#include "../../contracts/ibatterymanager.h"
 
 class TimeleftScreen : public IScreen
 {

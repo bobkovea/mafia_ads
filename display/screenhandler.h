@@ -1,7 +1,7 @@
 #pragma once
 
-#include "contracts/itransition.h"
-#include "contracts/iscreen.h"
+#include "../contracts/itransition.h"
+#include "../contracts/iscreen.h"
 
 struct ScreenItem
 {

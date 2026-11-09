@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../contracts/idisplay.h"
-#include "../contracts/iscreen.h"
-#include "../contracts/ibatterymanager.h"
+#include "../../contracts/idisplay.h"
+#include "../../contracts/iscreen.h"
+#include "../../contracts/ibatterymanager.h"
 
 class BatteryScreen : public IScreen
 {

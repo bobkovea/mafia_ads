@@ -2,7 +2,7 @@
 
 #include <avr/pgmspace.h>
 #include <LiquidCrystal_I2C.h>
-#include "contracts/idisplay.h"
+#include "../contracts/idisplay.h"
 
 class Lcd1602rus_hw : public IDisplay
 {

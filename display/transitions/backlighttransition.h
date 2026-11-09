@@ -1,7 +1,7 @@
 #pragma once
 
-#include "contracts/itransition.h"
-#include "contracts/ibacklight.h"
+#include "../../contracts/itransition.h"
+#include "../../contracts/ibacklight.h"
 
 class BacklightTransition : public ITransition
 {

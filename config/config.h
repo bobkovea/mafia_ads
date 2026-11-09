@@ -1,6 +1,6 @@
 #pragma once
 
-#include "statemachine.h"
+#include "../states/statemachine.h"
 
 static constexpr uint8_t CardReaderDataPin = 2;
 static constexpr uint8_t BuzzerPin = 3;
