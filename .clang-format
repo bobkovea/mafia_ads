@@ -1,0 +1,47 @@
+# Официальная конфигурация Arduino для ClangFormat
+# Источник: https://github.com/arduino/tooling-project-assets
+# Она максимально приближена к поведению автоформата Arduino IDE 1.8
+
+BasedOnStyle: LLVM
+Language: Cpp
+
+# Отступы: 2 пробела, как в 1.8
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+
+# Скобки: прикреплять к строке (стиль Attach), как это делала 1.8
+BreakBeforeBraces: Attach
+
+# Пробелы вокруг операторов и после управляющих конструкций (if/for/while)
+SpaceBeforeParens: ControlStatements
+SpaceAfterCStyleCast: false
+SpaceBeforeAssignmentOperators: true
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+# Указатели: выравнивать по правому краю (char *ptr)
+PointerAlignment: Right
+DerivePointerAlignment: true
+
+# Не разрывать длинные строки (как в 1.8, где не было лимита)
+ColumnLimit: 0
+
+# Сохранять пустые строки, но не более 2 подряд (в 1.8 обычно сохранялись)
+MaxEmptyLinesToKeep: 2
+KeepEmptyLinesAtTheStartOfBlocks: true
+
+# Разрешать короткие блоки и операторы на одной строке
+AllowShortBlocksOnASingleLine: Always
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AllowShortLoopsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortCaseLabelsOnASingleLine: true
+
+# Прочее
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignTrailingComments: true
+SortIncludes: false
+ReflowComments: false

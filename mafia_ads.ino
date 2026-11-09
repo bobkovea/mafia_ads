@@ -126,6 +126,32 @@ Screenset batteryScreenset =
   &backlightTransition // dummy
 };
 
+static constexpr uint32_t TimeleftScreenTypingPeriodMs = 60U;
+
+static const char TimeleftText[] PROGMEM = "До следующей    игры:";
+
+TimeleftScreen timeleftScreen(lcd, FPSTR(TimeleftText), TimeleftScreenTypingPeriodMs);
+
+static constexpr uint32_t TimeleftScreenDurationMs = UINT32_MAX;
+
+ScreenItem timeleftScreenItems[] =
+{
+  { &timeleftScreen, TimeleftScreenDurationMs }
+};
+
+static constexpr uint8_t TimeleftScreenCount = sizeof(timeleftScreenItems) / sizeof(timeleftScreenItems[0]);
+static constexpr uint32_t TimeleftScreensetDurationMs = 5000U;
+
+Screenset timeleftScreenset =
+{
+  timeleftScreenItems,
+  TimeleftScreenCount,
+  TimeleftScreensetDurationMs,
+  &backlightTransition // dummy
+};
+
+
+
 ScreenHandler screenHandler(&idleScreenset);
 StateMachine stateMachine(transitions, TransitionsCount, State::Idle);
 
@@ -192,8 +218,9 @@ void HandleState(const State state, const uint32_t now)
       break;
 
     case State::BadCardIndication:
+      screenHandler.Handle(now);
       musicPlayer.Loop();
-      if (musicPlayer.IsFinished())
+      if (screenHandler.IsGroupFinished() && musicPlayer.IsFinished())
       {
         stateMachine.TriggerEvent(Event::IndicationFinished);
       }
@@ -225,6 +252,8 @@ void StartBadCardIndication()
 {
   rfid.end();
   musicPlayer.PlayOops();
+  screenHandler.SetScreenset(&timeleftScreenset);
+  timeleftScreen.SetCardTimestamp(cardController.GetLastCardTimestamp());
 }
 
 void StartSlotMachine()
