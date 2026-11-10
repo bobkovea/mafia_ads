@@ -242,7 +242,7 @@ void HandleState(const State state, const uint32_t now)
 
 void StartGoodCardIndication()
 {
-  musicPlayer.PlayBeep();
+  musicPlayer.SetTrack(Track::Beep);
   backlight.ResetDiscrete();
   backlight.SetTotalDicsreteCycles(5U);
   rfid.end();
@@ -251,7 +251,7 @@ void StartGoodCardIndication()
 void StartBadCardIndication()
 {
   rfid.end();
-  musicPlayer.PlayOops();
+  musicPlayer.SetTrack(Track::Oops);
   screenHandler.SetScreenset(&timeleftScreenset);
   timeleftScreen.SetCardTimestamp(cardController.GetLastCardTimestamp());
 }
@@ -263,7 +263,7 @@ void StartSlotMachine()
 
 void StartEnding()
 {
-  musicPlayer.PlayRole(MafiaRole::Don);
+  musicPlayer.SetTrack(Track::Godfather);
   screenHandler.SetScreenset(&endingScreenset);
 }
 void StartIdle()

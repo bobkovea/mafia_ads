@@ -8,35 +8,33 @@
 #include "melodies/aha.h"
 #include "melodies/doorbeep.h"
 #include "melodies/oopsbeep.h"
-#include "../role/rolemanager.h"
+
+enum class Track : uint8_t
+{
+  Beep,
+  Oops,
+  Aha,
+  Pirates,
+  PinkPanther,
+  Godfather
+};
+
+struct MelodyData
+{
+  const Note* melody;
+  uint16_t length;
+};
 
 template <uint8_t buzzerPin>
 class MusicPlayer
 {
   public:
 
-    void PlayBeep()
-    {
-      Play(DoorBeep::melody, DoorBeep::melodyLength);
-    }
-
-    void PlayOops()
-    {
-      Play(OopsBeep::melody, OopsBeep::melodyLength);
-    }
-
-    //TODO сделать свой енум для мелодий, не привязываясь к RoleManager
-    void PlayRole(const MafiaRole role)
-    {
-      switch (role)
-      {
-        case MafiaRole::Citizen: Play(Aha::melody,         Aha::melodyLength);         break;
-        case MafiaRole::Sheriff: Play(Pirates::melody,     Pirates::melodyLength);     break;
-        case MafiaRole::Mafia:   Play(PinkPanther::melody, PinkPanther::melodyLength); break;
-        case MafiaRole::Don:     Play(Godfather::melody,   Godfather::melodyLength);   break;
-        default: break;
-      }
-    }
+  void SetTrack(const Track track)
+  {
+    const auto& t = Melodies[(uint8_t)track];
+    Play(t.melody, t.length);
+  }
 
     void Loop()
     {
@@ -49,8 +47,23 @@ class MusicPlayer
     }
 
   private:
+  
+  template<size_t N>
+  static constexpr MelodyData makeTrack(const Note (&arr)[N])
+  {
+    return { arr, static_cast<uint16_t>(N) };
+  }
 
-    void Play(const Note* melody, uint16_t length)
+  static constexpr MelodyData Melodies[] = {
+    makeTrack(DoorBeep::melody),
+    makeTrack(OopsBeep::melody),
+    makeTrack(Aha::melody),
+    makeTrack(Pirates::melody),
+    makeTrack(PinkPanther::melody),
+    makeTrack(Godfather::melody)
+  };
+
+    void Play(const Note* melody, const uint16_t length)
     {
       _player.stop();
       _player.loadMelody(length, melody);

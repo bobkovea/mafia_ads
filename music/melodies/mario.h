@@ -146,6 +146,4 @@ const Note melody[] PROGMEM =
   N(B4, S), N(F5, E), N(F5, S), N(F5, S), N(E5, E), N(D5, S), N(C5, H),
 };
 
-static constexpr uint16_t melodyLength = sizeof(melody) / sizeof(melody[0]);
-
 }
