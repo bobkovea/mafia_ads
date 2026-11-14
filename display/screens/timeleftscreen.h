@@ -3,15 +3,21 @@
 #include "../../contracts/idisplay.h"
 #include "../../contracts/iscreen.h"
 #include "../../contracts/ibatterymanager.h"
+#include "../../timers/periodictimer.h"
 
 class TimeleftScreen : public IScreen
 {
   public:
-    TimeleftScreen(IDisplay& lcd, const __FlashStringHelper* text, const uint32_t typingPeriod) :
+    TimeleftScreen(
+        IDisplay& lcd,
+        const __FlashStringHelper* text,
+        const uint32_t typingPeriodMs,
+        const uint32_t timeleftPeriodMs) :
         _lcd(lcd),
         _text(text),
-        _baseTextTypePeriodMs(typingPeriod),
-        _currentTextTypePeriodMs(typingPeriod)
+        _timeleftUpdateTimer(timeleftPeriodMs),
+        _typingTimer(typingPeriodMs),
+        _baseTypingPeriod(typingPeriodMs)
     {
     }
 
@@ -20,58 +26,51 @@ class TimeleftScreen : public IScreen
         _cardTimestampMs = timestampMs;
     }
 
-    void OnEnter() override
+    void OnEnter(const uint32_t now) override
     {
         _lcd.noBlink();
-        _lcd.noCursor();
         _lcd.clear();
+        _lcd.cursor();
         _col = _row = 0U;
         _byteIndex = 0U;
-        _lastTimeleftUpdateMs = _lastTextTypeMs = 0U;
+        _typingDone = false;
+        _timeleftUpdateTimer.Reset(now);
+        _typingTimer.Reset(now);
     }
 
     void Tick(const uint32_t now) override
     {
-        if (now - _lastTimeleftUpdateMs >= TimeleftUpdatePeriodMs)
+        if (_typingDone && _timeleftUpdateTimer.Expired(now))
         {
-            _lastTimeleftUpdateMs = now;
             const int32_t timeLeftMs = Time24hMs - ((int32_t)now - (int32_t)_cardTimestampMs);
             PrintTimeLeft(timeLeftMs < 0 ? 0U : (uint32_t)timeLeftMs);
         }
 
-        if (FlashCharAt(_text, _byteIndex) != 0 && (now - _lastTextTypeMs >= _currentTextTypePeriodMs))
+        if (!_typingDone && _typingTimer.Expired(now))
         {
-            _lastTextTypeMs = now;
-            _currentTextTypePeriodMs = _baseTextTypePeriodMs + random(0, _baseTextTypePeriodMs);
-            _lcd.setCursor(_col, _row);
-            const uint8_t len = _lcd.printUtf8CharFlash(_text, _byteIndex);
-            _byteIndex += len;
-            ++_col;
-            if (_col >= 16)
+            _typingDone = TypeNextChar();
+            if (_typingDone)
             {
-                _col = 0;
-                _row = _row == 0 ? 1 : 0;
+                _lcd.noCursor();
             }
+            _typingTimer.SetPeriod(_baseTypingPeriod + random(0, _baseTypingPeriod));
         }
     }
 
   private:
-    IDisplay& _lcd;
-    const __FlashStringHelper* _text;
-    uint32_t _baseTextTypePeriodMs;
-    uint32_t _currentTextTypePeriodMs;
-
-    static constexpr uint32_t TimeleftUpdatePeriodMs = 1000U;
-
-    uint32_t _lastTimeleftUpdateMs = 0U;
-    uint32_t _cardTimestampMs = 0U;
-
-    uint32_t _lastTextTypeMs = 0U;
-    uint8_t _col = 0U;
-    uint8_t _row = 0U;
-    uint8_t _byteIndex = 0U;
-
-    static constexpr int32_t Time24hMs = 86400000U; // 24 часа
+    bool TypeNextChar()
+    {
+        if (FlashCharAt(_text, _byteIndex) == 0)
+            return true;
+        _lcd.setCursor(_col++, _row);
+        _byteIndex += _lcd.printUtf8CharFlash(_text, _byteIndex);
+        if (_col >= 16)
+        {
+            _col = 0;
+            ++_row;
+        }
+        return false;
+    }
 
     void PrintTimeLeft(const uint32_t timeLeftMs)
     {
@@ -93,4 +92,16 @@ class TimeleftScreen : public IScreen
             _lcd.printChar('0');
         _lcd.print(seconds, 10);
     }
+
+    IDisplay& _lcd;
+    const __FlashStringHelper* _text;
+    uint8_t _col = 0U;
+    uint8_t _row = 0U;
+    uint8_t _byteIndex = 0U;
+    uint32_t _cardTimestampMs = 0U;
+    bool _typingDone = false;
+    static constexpr int32_t Time24hMs = 86400000U; // 24 часа
+    PeriodicTimer _timeleftUpdateTimer;
+    PeriodicTimer _typingTimer;
+    uint32_t _baseTypingPeriod;
 };

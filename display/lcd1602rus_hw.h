@@ -59,9 +59,9 @@ class Lcd1602rus_hw : public IDisplay
         _lcd.clear();
     }
 
-    void createChar(uint8_t addr, uint8_t* sym) override
+    void createChar(uint8_t addr, const uint8_t* sym) override
     {
-        _lcd.createChar(addr, sym);
+        _lcd.createChar(addr, const_cast<uint8_t*>(sym));
     }
 
     void write(uint8_t addr) override

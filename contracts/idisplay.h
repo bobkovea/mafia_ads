@@ -6,7 +6,7 @@ class IDisplay
     virtual void begin() = 0;
     virtual void setCursor(uint8_t c, uint8_t r) = 0;
     virtual void clear() = 0;
-    virtual void createChar(uint8_t addr, uint8_t* sym) = 0;
+    virtual void createChar(uint8_t addr, const uint8_t* sym) = 0;
     virtual void write(uint8_t addr) = 0;
     virtual void print(uint8_t num, int base = 10) = 0;
     virtual void print(uint16_t num, int base = 10) = 0;

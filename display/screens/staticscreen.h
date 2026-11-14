@@ -13,7 +13,7 @@ class StaticScreen : public IScreen
     {
     }
 
-    void OnEnter() override
+    void OnEnter(const uint32_t now) override
     {
         _lcd.clear();
         _lcd.setCursor(0, 0);

@@ -34,9 +34,9 @@ class ScreenHandler
     void Begin()
     {
         _currentScreen = 0;
-        GetCurrentScreen()->OnEnter();
-        _status = ScreenStatus::InProgress;
         const uint32_t now = millis();
+        GetCurrentScreen()->OnEnter(now);
+        _status = ScreenStatus::InProgress;
         _lastSwitch = _lastEnter = now;
         GetTransition()->Start(now);
     }
@@ -70,7 +70,7 @@ class ScreenHandler
             if (GetTransition()->IsHidden())
             {
                 _currentScreen = (_currentScreen + 1) % GetScreensCount();
-                GetCurrentScreen()->OnEnter();
+                GetCurrentScreen()->OnEnter(now);
                 _status = ScreenStatus::ScreenTransitionHalf;
             }
             break;

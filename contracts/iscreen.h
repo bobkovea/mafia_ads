@@ -3,12 +3,13 @@
 class IScreen
 {
   public:
-    virtual void OnEnter()
+    virtual void OnEnter(const uint32_t now)
     {
+      (void)now;
     }
 
-    virtual void Tick(const uint32_t uptime)
+    virtual void Tick(const uint32_t now)
     {
-        (void)uptime;
+        (void)now;
     }
 };

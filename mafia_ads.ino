@@ -48,7 +48,7 @@ static const char ArrowText1[] PROGMEM = "Узнай свою роль!";
 
 TypingScreen idleScreen0(lcd, FPSTR(IdleText0), IdleScreen0TypingPeriodMs);
 TypingScreen idleScreen1(lcd, FPSTR(IdleText1), IdleScreen1TypingPeriodMs);
-ArrowScreen arrowScreen(lcd, FPSTR(ArrowText0), FPSTR(ArrowText1), ArrowScreenTypingPeriodMs);
+ArrowScreen arrowScreen(lcd, FPSTR(ArrowText0), FPSTR(ArrowText1), ArrowScreenTypingPeriodMs, 400U, 4000U);
 
 static constexpr uint32_t IdleScreen0DurationMs = 7000U;
 static constexpr uint32_t IdleScreen1DurationMs = 7000U;
@@ -112,7 +112,7 @@ static constexpr uint32_t TimeleftScreenTypingPeriodMs = 60U;
 
 static const char TimeleftText[] PROGMEM = "До следующей    игры:";
 
-TimeleftScreen timeleftScreen(lcd, FPSTR(TimeleftText), TimeleftScreenTypingPeriodMs);
+TimeleftScreen timeleftScreen(lcd, FPSTR(TimeleftText), TimeleftScreenTypingPeriodMs, 1000U);
 
 static constexpr uint32_t TimeleftScreenDurationMs = UINT32_MAX;
 
