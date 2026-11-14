@@ -1,47 +1,72 @@
-# Официальная конфигурация Arduino для ClangFormat
-# Источник: https://github.com/arduino/tooling-project-assets
-# Она максимально приближена к поведению автоформата Arduino IDE 1.8
+# Версия clang и clang-format: 17.0.6
+# Список опций: https://clang.llvm.org/docs/ClangFormatStyleOptions.html
 
-BasedOnStyle: LLVM
+# Ручной запуск для форматирования файла:
+# clang-format -i --style=file <file>
+
+# Источник.
 Language: Cpp
+BasedOnStyle: Microsoft
 
-# Отступы: 2 пробела, как в 1.8
-IndentWidth: 2
-TabWidth: 2
-UseTab: Never
+# Ограничение на ширину текста.
+ColumnLimit: 110
 
-# Скобки: прикреплять к строке (стиль Attach), как это делала 1.8
-BreakBeforeBraces: Attach
+# Перенос строки после шаблона.
+#   template <class T>\n
+#   struct tIsFlagsEnum
+AlwaysBreakTemplateDeclarations: Yes
 
-# Пробелы вокруг операторов и после управляющих конструкций (if/for/while)
-SpaceBeforeParens: ControlStatements
-SpaceAfterCStyleCast: false
-SpaceBeforeAssignmentOperators: true
-SpacesInParentheses: false
-SpacesInSquareBrackets: false
+# Всегда переносить скобки.
+BreakBeforeBraces: Allman
 
-# Указатели: выравнивать по правому краю (char *ptr)
-PointerAlignment: Right
-DerivePointerAlignment: true
+# Перенос после двоеточия в списке наследования.
+BreakInheritanceList: AfterColon
 
-# Не разрывать длинные строки (как в 1.8, где не было лимита)
-ColumnLimit: 0
+# Перенос после двоеточия в списке инициализаторов класса.
+BreakConstructorInitializers: AfterColon
 
-# Сохранять пустые строки, но не более 2 подряд (в 1.8 обычно сохранялись)
-MaxEmptyLinesToKeep: 2
-KeepEmptyLinesAtTheStartOfBlocks: true
+# Разбивать инициализаторы класса.
+PackConstructorInitializers: Never
 
-# Разрешать короткие блоки и операторы на одной строке
-AllowShortBlocksOnASingleLine: Always
-AllowShortIfStatementsOnASingleLine: AllIfsAndElse
-AllowShortLoopsOnASingleLine: true
-AllowShortFunctionsOnASingleLine: Empty
-AllowShortCaseLabelsOnASingleLine: true
+# Отступы между блоками, методами и т.д.
+SeparateDefinitionBlocks: Always
 
-# Прочее
-AlignAfterOpenBracket: Align
-AlignConsecutiveAssignments: false
-AlignConsecutiveDeclarations: false
-AlignTrailingComments: true
-SortIncludes: false
-ReflowComments: false
+# Добавлять // namespace <Name> за скобкой закрытия namespace.
+FixNamespaceComments: true
+
+# Не сортировать include. До исправления моков для юнит тестов,
+# работающих через подмену типов в порядке включения файлов
+SortIncludes: Never
+
+# Не выстраивать короткие блоки в одну строку.
+AllowShortBlocksOnASingleLine: Never
+
+# Не выстраивать короткие функции в одну строку.
+AllowShortFunctionsOnASingleLine: None
+
+# В начале комментария один пробел или более.
+SpacesInLineCommentPrefix:
+  Minimum: 1
+  Maximum: -1
+
+# Не пытаться упаковывать аргументы/параметры в одну строку попарно,
+# когда все сразу не умещаются.
+BinPackParameters: false
+BinPackArguments: false
+
+# Всегда переносить после открывающей скобки, если параметры не умещаются на одной строке.
+AlignAfterOpenBracket: AlwaysBreak
+
+# Если вызов функции или инициализатор в скобках не умещаются на одной строке, разрешить
+# перенос всех аргументов на следующую строку, даже если BinPackArguments == false.
+AllowAllArgumentsOnNextLine: true
+
+# Если определение функции не умещается на одной строке, разрешить перемещение всех параметров
+# на следующей строке, даже если BinPackParameters == OnePerLine.
+AllowAllParametersOfDeclarationOnNextLine: true
+
+# Указатели и ссылки выравнивать по левой стороне.
+PointerAlignment: Left
+
+# Вставлять запятую в конце списка, который занимает несколько строк.
+InsertTrailingCommas: Wrapped

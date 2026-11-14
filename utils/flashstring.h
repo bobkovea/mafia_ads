@@ -6,5 +6,5 @@
 
 inline char FlashCharAt(const __FlashStringHelper* s, uint16_t index)
 {
-  return (char)pgm_read_byte(reinterpret_cast<const char*>(s) + index);
+    return (char)pgm_read_byte(reinterpret_cast<const char*>(s) + index);
 }

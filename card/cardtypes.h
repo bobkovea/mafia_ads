@@ -8,21 +8,21 @@ using CardId = uint8_t[IdBytesCount];
 
 struct IdAndTimestamp
 {
-  CardId id;
-  uint32_t timestamp;
+    CardId id;
+    uint32_t timestamp;
 };
 
 enum class UploadStatus : uint8_t
 {
-	NoCard,
-	NewCardAdded,
-	StorageIsFull,
-	ExistingCardUpdated,
-	ExistingCardTimeleft
+    NoCard,
+    NewCardAdded,
+    StorageIsFull,
+    ExistingCardUpdated,
+    ExistingCardTimeleft
 };
 
 struct UploadStatusAndTimestamp
 {
-	UploadStatus status;
-	uint32_t timestamp;
+    UploadStatus status;
+    uint32_t timestamp;
 };

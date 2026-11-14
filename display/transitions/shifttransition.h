@@ -6,39 +6,45 @@
 class ShiftTransition : public ITransition
 {
   public:
-    explicit ShiftTransition(IDisplay& lcd) : _lcd(lcd) {}
+    explicit ShiftTransition(IDisplay& lcd) :
+        _lcd(lcd)
+    {
+    }
 
     void Start(const uint32_t now) override
     {
-      _isFinished = false;
-      _scrollsCount = 0;
-      _lastShiftMs = now;
+        _isFinished = false;
+        _scrollsCount = 0;
+        _lastShiftMs = now;
     }
 
     void Tick(const uint32_t now, const TransitionPhase phase) override
     {
-		(void)phase;
-      if (!_isFinished)
-      {
-        if (now - _lastShiftMs >= ShiftPeriodMs)
+        (void)phase;
+        if (!_isFinished)
         {
-          _lastShiftMs = now;
-          _lcd.scrollDisplayLeft();
-          ++_scrollsCount;
-          if (_scrollsCount >= 16)
-          {
-            _isFinished = true;
-            _lcd.clear(); // +setCursor(0, 0)
-          }
+            if (now - _lastShiftMs >= ShiftPeriodMs)
+            {
+                _lastShiftMs = now;
+                _lcd.scrollDisplayLeft();
+                ++_scrollsCount;
+                if (_scrollsCount >= 16)
+                {
+                    _isFinished = true;
+                    _lcd.clear(); // +setCursor(0, 0)
+                }
+            }
         }
-      }
     }
 
-    bool IsHidden() const override  {
-      return _isFinished;
+    bool IsHidden() const override
+    {
+        return _isFinished;
     }
-    bool IsVisible() const override {
-      return _isFinished;
+
+    bool IsVisible() const override
+    {
+        return _isFinished;
     }
 
   private:

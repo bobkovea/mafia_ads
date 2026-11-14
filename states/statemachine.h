@@ -7,8 +7,8 @@
 class StateMachine
 {
   public:
-    StateMachine(const Transition* transitions, const uint8_t transitionsCount, const State initialState)
-      : mTransitions(transitions),
+    StateMachine(const Transition* transitions, const uint8_t transitionsCount, const State initialState) :
+        mTransitions(transitions),
         mTransitionsCount(transitionsCount),
         mCurrentState(initialState),
         mEvents((uint8_t)Event::None)
@@ -18,40 +18,40 @@ class StateMachine
     // Генерация события
     void TriggerEvent(Event event)
     {
-      mEvents |= (uint8_t)event;
+        mEvents |= (uint8_t)event;
     }
 
     // Обработка переходов
     State Process()
     {
-      if (mEvents != (uint8_t)Event::None)
-      {
-        const uint8_t currentEvents = mEvents;
-        mEvents = (uint8_t)Event::None;
-
-        for (uint8_t i = 0; i < mTransitionsCount; i++)
+        if (mEvents != (uint8_t)Event::None)
         {
-          const Transition& trans = mTransitions[i];
+            const uint8_t currentEvents = mEvents;
+            mEvents = (uint8_t)Event::None;
 
-          const bool stateMatches = trans.currentState == mCurrentState;
-          const bool eventMatches = (trans.event & currentEvents) != 0;
-
-          if (stateMatches && eventMatches)
-          {
-            // Выполняем действие
-            if (trans.action != nullptr)
+            for (uint8_t i = 0; i < mTransitionsCount; i++)
             {
-              trans.action();
+                const Transition& trans = mTransitions[i];
+
+                const bool stateMatches = trans.currentState == mCurrentState;
+                const bool eventMatches = (trans.event & currentEvents) != 0;
+
+                if (stateMatches && eventMatches)
+                {
+                    // Выполняем действие
+                    if (trans.action != nullptr)
+                    {
+                        trans.action();
+                    }
+
+                    // Переходим в новое состояние
+                    mCurrentState = trans.nextState;
+                    break;
+                }
             }
-
-            // Переходим в новое состояние
-            mCurrentState = trans.nextState;
-            break;
-          }
         }
-      }
 
-      return mCurrentState;
+        return mCurrentState;
     }
 
   private:

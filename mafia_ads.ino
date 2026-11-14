@@ -20,11 +20,11 @@
 #include "card/cardcontroller.h"
 #include "utils/flashstring.h"
 
-//RoleManager roleManager;
+// RoleManager roleManager;
 
 SoftwareSerial rfid(CardReaderDataPin, CardReaderDataPin);
 CardReader cardReader(rfid);
-static constexpr int8_t StorageSize = 32; // максимум пропусков в базе
+static constexpr int8_t StorageSize = 32;            // максимум пропусков в базе
 static constexpr uint32_t TimeBetweenMs = 86400000U; // 24 часа
 CardStorage<StorageSize, TimeBetweenMs> cardStorage;
 CardController cardController(cardReader, cardStorage);
@@ -48,29 +48,21 @@ static const char ArrowText1[] PROGMEM = "Узнай свою роль!";
 
 TypingScreen idleScreen0(lcd, FPSTR(IdleText0), IdleScreen0TypingPeriodMs);
 TypingScreen idleScreen1(lcd, FPSTR(IdleText1), IdleScreen1TypingPeriodMs);
-ArrowScreen arrowScreen(lcd, FPSTR(ArrowText0), 
-  FPSTR(ArrowText1), ArrowScreenTypingPeriodMs);
+ArrowScreen arrowScreen(lcd, FPSTR(ArrowText0), FPSTR(ArrowText1), ArrowScreenTypingPeriodMs);
 
 static constexpr uint32_t IdleScreen0DurationMs = 7000U;
 static constexpr uint32_t IdleScreen1DurationMs = 7000U;
 static constexpr uint32_t ArrowScreenDurationMs = 15000U;
 
-ScreenItem idleScreenItems[] =
-{
-  { &idleScreen0, IdleScreen0DurationMs },
-  { &idleScreen1, IdleScreen1DurationMs },
-  { &arrowScreen, ArrowScreenDurationMs },
+ScreenItem idleScreenItems[] = {
+    {&idleScreen0, IdleScreen0DurationMs},
+    {&idleScreen1, IdleScreen1DurationMs},
+    {&arrowScreen, ArrowScreenDurationMs},
 };
 static constexpr uint8_t IdleScreenCount = sizeof(idleScreenItems) / sizeof(idleScreenItems[0]);
 static constexpr uint32_t IdleScreensetDurationMs = UINT32_MAX;
 
-Screenset idleScreenset =
-{
-  idleScreenItems,
-  IdleScreenCount,
-  IdleScreensetDurationMs,
-  &backlightTransition
-};
+Screenset idleScreenset = {idleScreenItems, IdleScreenCount, IdleScreensetDurationMs, &backlightTransition};
 
 static constexpr uint32_t EndingScreenTypingPeriodMs = 50U;
 
@@ -86,44 +78,34 @@ static constexpr uint32_t EndingScreen0DurationMs = 4000U;
 static constexpr uint32_t EndingScreen1DurationMs = 8000U;
 static constexpr uint32_t EndingScreen2DurationMs = 5000U;
 
-ScreenItem endingScreenItems[] =
-{
-  { &endingScreen0, EndingScreen0DurationMs },
-  { &endingScreen1, EndingScreen1DurationMs },
-  { &endingScreen2, EndingScreen2DurationMs },
+ScreenItem endingScreenItems[] = {
+    {&endingScreen0, EndingScreen0DurationMs},
+    {&endingScreen1, EndingScreen1DurationMs},
+    {&endingScreen2, EndingScreen2DurationMs},
 };
 
 static constexpr uint8_t EndingScreenCount = sizeof(endingScreenItems) / sizeof(endingScreenItems[0]);
 
 static constexpr uint32_t EndingScreensetDurationMs = 20000U;
 
-Screenset endingScreenset =
-{
-  endingScreenItems,
-  EndingScreenCount,
-  EndingScreensetDurationMs,
-  &shiftTransition
-};
+Screenset endingScreenset = {
+    endingScreenItems, EndingScreenCount, EndingScreensetDurationMs, &shiftTransition};
 
 static constexpr uint32_t BatteryScreenTypingPeriodMs = 120U;
 BatteryScreen batteryScreen(lcd, batteryManager);
 
 static constexpr uint32_t BatteryScreenDurationMs = 20000U;
 
-ScreenItem batteryScreenItems[] =
-{
-  { &batteryScreen, BatteryScreenDurationMs }
-};
+ScreenItem batteryScreenItems[] = {{&batteryScreen, BatteryScreenDurationMs}};
 
 static constexpr uint8_t BatteryScreenCount = sizeof(batteryScreenItems) / sizeof(batteryScreenItems[0]);
 static constexpr uint32_t BatteryScreensetDurationMs = 5000U;
 
-Screenset batteryScreenset =
-{
-  batteryScreenItems,
-  BatteryScreenCount,
-  BatteryScreensetDurationMs,
-  &backlightTransition // dummy
+Screenset batteryScreenset = {
+    batteryScreenItems,
+    BatteryScreenCount,
+    BatteryScreensetDurationMs,
+    &backlightTransition // dummy
 };
 
 static constexpr uint32_t TimeleftScreenTypingPeriodMs = 60U;
@@ -134,146 +116,140 @@ TimeleftScreen timeleftScreen(lcd, FPSTR(TimeleftText), TimeleftScreenTypingPeri
 
 static constexpr uint32_t TimeleftScreenDurationMs = UINT32_MAX;
 
-ScreenItem timeleftScreenItems[] =
-{
-  { &timeleftScreen, TimeleftScreenDurationMs }
-};
+ScreenItem timeleftScreenItems[] = {{&timeleftScreen, TimeleftScreenDurationMs}};
 
 static constexpr uint8_t TimeleftScreenCount = sizeof(timeleftScreenItems) / sizeof(timeleftScreenItems[0]);
 static constexpr uint32_t TimeleftScreensetDurationMs = 5000U;
 
-Screenset timeleftScreenset =
-{
-  timeleftScreenItems,
-  TimeleftScreenCount,
-  TimeleftScreensetDurationMs,
-  &backlightTransition // dummy
+Screenset timeleftScreenset = {
+    timeleftScreenItems,
+    TimeleftScreenCount,
+    TimeleftScreensetDurationMs,
+    &backlightTransition // dummy
 };
-
-
 
 ScreenHandler screenHandler(&idleScreenset);
 StateMachine stateMachine(transitions, TransitionsCount, State::Idle);
 
 void setup()
 {
-  randomSeed(analogRead(A0));
-  pinMode(BuzzerPin, OUTPUT);
-  pinMode(CardReaderPowerPin, OUTPUT);
-  digitalWrite(CardReaderPowerPin, HIGH);
-  pinMode(BacklightPin, OUTPUT);
-  digitalWrite(BacklightPin, HIGH);
-  lcd.begin();
-  screenHandler.Begin();
-  rfid.begin(9600);
+    randomSeed(analogRead(A0));
+    pinMode(BuzzerPin, OUTPUT);
+    pinMode(CardReaderPowerPin, OUTPUT);
+    digitalWrite(CardReaderPowerPin, HIGH);
+    pinMode(BacklightPin, OUTPUT);
+    digitalWrite(BacklightPin, HIGH);
+    lcd.begin();
+    screenHandler.Begin();
+    rfid.begin(9600);
 }
 
 void loop()
 {
-  const State currentState = stateMachine.Process();
-  const uint32_t now = millis(); // todo какой-то баг с порядком millis
-  HandleState(currentState, now);
-//  batteryManager.Tick(now);
+    const State currentState = stateMachine.Process();
+    const uint32_t now = millis(); // todo какой-то баг с порядком millis
+    HandleState(currentState, now);
+    //  batteryManager.Tick(now);
 }
 
 void HandleState(const State state, const uint32_t now)
 {
-  switch (state)
-  {
+    switch (state)
+    {
     case State::Idle:
         screenHandler.Handle(now);
-        switch(cardController.Poll(now))
+        switch (cardController.Poll(now))
         {
-          case UploadStatus::NewCardAdded:
-          case UploadStatus::ExistingCardUpdated:
+        case UploadStatus::NewCardAdded:
+        case UploadStatus::ExistingCardUpdated:
             stateMachine.TriggerEvent(Event::GoodCardDetected);
-          break;
+            break;
 
-          case UploadStatus::ExistingCardTimeleft:
+        case UploadStatus::ExistingCardTimeleft:
             stateMachine.TriggerEvent(Event::BadCardDetected);
-          break;
-          
-          case UploadStatus::NoCard:
-          case UploadStatus::StorageIsFull:
-          // todo storage is full screen
-          break;
+            break;
+
+        case UploadStatus::NoCard:
+        case UploadStatus::StorageIsFull:
+            // todo storage is full screen
+            break;
         }
-      break;
+        break;
 
     case State::BatteryIndication:
-      screenHandler.Handle(now);
-      if (screenHandler.IsGroupFinished())
-      {
-        stateMachine.TriggerEvent(Event::IndicationFinished);
-      }
-      break;
+        screenHandler.Handle(now);
+        if (screenHandler.IsGroupFinished())
+        {
+            stateMachine.TriggerEvent(Event::IndicationFinished);
+        }
+        break;
 
     case State::GoodCardIndication:
-      musicPlayer.Loop();
-      backlight.TickDiscrete(now);
-      if (backlight.IsDiscreteEnded() && musicPlayer.IsFinished())
-      {
-        stateMachine.TriggerEvent(Event::IndicationFinished);
-      }
-      break;
+        musicPlayer.Loop();
+        backlight.TickDiscrete(now);
+        if (backlight.IsDiscreteEnded() && musicPlayer.IsFinished())
+        {
+            stateMachine.TriggerEvent(Event::IndicationFinished);
+        }
+        break;
 
     case State::BadCardIndication:
-      screenHandler.Handle(now);
-      musicPlayer.Loop();
-      if (screenHandler.IsGroupFinished() && musicPlayer.IsFinished())
-      {
-        stateMachine.TriggerEvent(Event::IndicationFinished);
-      }
-      break;
+        screenHandler.Handle(now);
+        musicPlayer.Loop();
+        if (screenHandler.IsGroupFinished() && musicPlayer.IsFinished())
+        {
+            stateMachine.TriggerEvent(Event::IndicationFinished);
+        }
+        break;
 
     case State::SlotMachine:
-      break;
+        break;
 
     case State::Ending:
-      screenHandler.Handle(now);
-      musicPlayer.Loop();
-      if (screenHandler.IsGroupFinished() && musicPlayer.IsFinished())
-      {
-        stateMachine.TriggerEvent(Event::IndicationFinished);
-      }
-      break;
-  }
+        screenHandler.Handle(now);
+        musicPlayer.Loop();
+        if (screenHandler.IsGroupFinished() && musicPlayer.IsFinished())
+        {
+            stateMachine.TriggerEvent(Event::IndicationFinished);
+        }
+        break;
+    }
 }
 
 void StartGoodCardIndication()
 {
-  musicPlayer.SetTrack(Track::Beep);
-  backlight.ResetDiscrete();
-  backlight.SetTotalDicsreteCycles(5U);
-  rfid.end();
+    musicPlayer.SetTrack(Track::Beep);
+    backlight.ResetDiscrete();
+    backlight.SetTotalDicsreteCycles(5U);
+    rfid.end();
 }
 
 void StartBadCardIndication()
 {
-  rfid.end();
-  musicPlayer.SetTrack(Track::Oops);
-  screenHandler.SetScreenset(&timeleftScreenset);
-  timeleftScreen.SetCardTimestamp(cardController.GetLastCardTimestamp());
+    rfid.end();
+    musicPlayer.SetTrack(Track::Oops);
+    screenHandler.SetScreenset(&timeleftScreenset);
+    timeleftScreen.SetCardTimestamp(cardController.GetLastCardTimestamp());
 }
 
 void StartSlotMachine()
 {
-
 }
 
 void StartEnding()
 {
-  musicPlayer.SetTrack(Track::Godfather);
-  screenHandler.SetScreenset(&endingScreenset);
+    musicPlayer.SetTrack(Track::Godfather);
+    screenHandler.SetScreenset(&endingScreenset);
 }
+
 void StartIdle()
 {
-  cardController.Reset();
-  rfid.begin(9600);
-  screenHandler.SetScreenset(&idleScreenset);
+    cardController.Reset();
+    rfid.begin(9600);
+    screenHandler.SetScreenset(&idleScreenset);
 }
 
 void StartBatteryIndication()
 {
-  screenHandler.SetScreenset(&batteryScreenset);
+    screenHandler.SetScreenset(&batteryScreenset);
 }
