@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include <Arduino.h>
 #include "states.h"
 
 // ============ Класс конечного автомата ============

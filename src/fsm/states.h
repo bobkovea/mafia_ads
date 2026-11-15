@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Arduino.h>
+
 // ============ Состояния ============
 enum class State : uint8_t
 {

@@ -5,6 +5,7 @@
 #include "../../utils/flashstring.h"
 #include "../../timers/periodictimer.h"
 #include "../customsymbols.h"
+#include "texttyper.h"
 
 class ArrowScreen : public IScreen
 {
@@ -22,8 +23,7 @@ class ArrowScreen : public IScreen
         _currentText(text0),
         _arrowsBlinkTimer(arrowsBlinkPeriodMs),
         _textChangeTimer(textChangePeriodMs),
-        _typingTimer(typingPeriodMs),
-        _baseTypingPeriod(typingPeriodMs)
+        _textTyper(lcd, text0, typingPeriodMs) //todo add ctor with no text
     {
     }
 
@@ -32,14 +32,11 @@ class ArrowScreen : public IScreen
         _lcd.noBlink();
         _lcd.clear();
         PrintArrows();
-        _lcd.setCursor(0, 0);
         _lcd.cursor();
-        _col = 0U;
-        _byteIndex = 0U;
-        _currentText = _text0;
         _arrowsBlinkTimer.Reset(now);
         _textChangeTimer.Reset(now);
-        _typingTimer.Reset(now);
+        _textTyper.SetText(_text0);
+        _textTyper.Reset(now);
     }
 
     void Tick(const uint32_t now) override
@@ -51,40 +48,30 @@ class ArrowScreen : public IScreen
 
         if (_textChangeTimer.Expired(now))
         {
-            ToggleText();
-            _typingTimer.Reset(now);
+            ClearUpperRow();
+            _textTyper.SetText(_textTyper.GetText() == _text0 ? _text1 : _text0);
+            _textTyper.Reset(now);
+            _lcd.cursor();
         }
 
-        if (_typingTimer.Expired(now) && !TypeNextChar())
+        if (_textTyper.Tick(now))
         {
-            _typingTimer.SetPeriod(_baseTypingPeriod + random(0, _baseTypingPeriod));
+            _lcd.noCursor();
         }
     }
 
   private:
     void ChangeArrowsState()
     {
-        _lcd.createChar(0, _arrowState ? ArrowDown0 : ArrowDown1);
-        _lcd.setCursor(_col, 0); // createChar почему-то сбивает положение курсора
         _arrowState = !_arrowState;
+        _lcd.createChar(0, _arrowState ? ArrowDown0 : ArrowDown1);
+        _textTyper.RestoreCursorPos(); // т.к. createChar сбивает положение курсора
     }
 
-    void ToggleText()
+    void ClearUpperRow()
     {
-        _col = 0U;
-        _byteIndex = 0U;
-        _currentText = _currentText == _text0 ? _text1 : _text0;
         _lcd.setCursor(0, 0);
         _lcd.print(F("                "));
-    }
-
-    bool TypeNextChar()
-    {
-        if (FlashCharAt(_currentText, _byteIndex) == 0)
-            return true;
-        _lcd.setCursor(_col++, 0U); // длина - не больше 16 символов!
-        _byteIndex += _lcd.printUtf8CharFlash(_currentText, _byteIndex);
-        return false;
     }
 
     void PrintArrows()
@@ -103,11 +90,7 @@ class ArrowScreen : public IScreen
     const __FlashStringHelper* _text1;
     const __FlashStringHelper* _currentText;
     bool _arrowState = false;
-    uint8_t _col = 0U;
-    uint8_t _byteIndex = 0U;
-
     PeriodicTimer _arrowsBlinkTimer;
     PeriodicTimer _textChangeTimer;
-    PeriodicTimer _typingTimer;
-    uint32_t _baseTypingPeriod;
+    TextTyper _textTyper;
 };

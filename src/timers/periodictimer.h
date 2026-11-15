@@ -17,13 +17,7 @@ class PeriodicTimer
     {
         _last = now;
     }
-
-    // Сдвигаем на now, а не на _last+_period — чтобы не «догонять» при пропущенных тиках
-    void Restart(uint32_t now)
-    {
-        _last = now;
-    }
-
+    
     bool Expired(uint32_t now)
     {
         if (now - _last < _period)
