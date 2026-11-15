@@ -2,7 +2,7 @@
 #include "statehandlers.h"
 #include "..\app\peripherals.h"
 #include "..\app\displays.h"
-#include "statemachine_global.h"
+#include "..\app\statemachine_global.h"
 
 void StartIdle()
 {

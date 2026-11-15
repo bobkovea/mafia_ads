@@ -1,8 +1,8 @@
 #include "src/app/peripherals.h"
 #include "src/app/displays.h"
+#include "src/app/statemachine_global.h"
 #include "src/config/pins.h"
 #include "src/fsm/statehandlers.h"
-#include "src/fsm/statemachine_global.h"
 
 void setup()
 {

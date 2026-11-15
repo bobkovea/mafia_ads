@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Arduino.h> 
+#include <Arduino.h>
 
 static constexpr uint8_t CardReaderDataPin = 2;
 static constexpr uint8_t BuzzerPin = 5;
