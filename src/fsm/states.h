@@ -18,20 +18,21 @@ enum class Event : uint8_t
 {
     None = 0x00,
     GoodCardDetected = 0x01,
-    BadCardDetected = 0x02,
-    IndicationFinished = 0x04,
-    SlotMachineFinished = 0x08,
-    BatteryIndicationRequested = 0x10,
+    TimeleftCardDetected = 0x02,
+    StorageIsFull = 0x04,
+    IndicationFinished = 0x08,
+    SlotMachineFinished = 0x10,
+    BatteryIndicationRequested = 0x20
 };
 
 // ============ Прототип действия ============
 typedef void (*ActionCallback)();
 
-// ============ Структура перехода ============
+// ============ Структура перехода ============z
 struct Transition
 {
     State currentState;
-    uint8_t event;
+    Event event;
     State nextState;
     ActionCallback action;
 };

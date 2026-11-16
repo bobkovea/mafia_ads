@@ -36,7 +36,7 @@ class TextTyper
         return _typingDone;
     }
 
-     void SetText(const __FlashStringHelper* text)
+    void SetText(const __FlashStringHelper* text)
     {
         _text = text;
     }
@@ -46,7 +46,6 @@ class TextTyper
         return _text;
     }
 
-
     void Reset(const uint32_t now)
     {
         _col = _row = _byteIndex = 0U;
@@ -55,12 +54,10 @@ class TextTyper
         _typingTimer.Reset(now);
     }
 
-
     void RestoreCursorPos()
     {
         _lcd.setCursor(_col, _row);
     }
-
 
   private:
     bool TypeNextChar()

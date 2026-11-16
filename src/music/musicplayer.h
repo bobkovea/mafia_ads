@@ -69,3 +69,6 @@ class MusicPlayer
 
     BuzzerMelody _player = BuzzerMelody(buzzerPin, 0, nullptr);
 };
+
+template <uint8_t buzzerPin>
+constexpr MelodyData MusicPlayer<buzzerPin>::Melodies[];

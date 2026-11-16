@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
-#include "states.h"
+#include "states.h" // for State, Event, Transition
 
 // ============ Класс конечного автомата ============
 class StateMachine
@@ -34,7 +34,7 @@ class StateMachine
                 const Transition& trans = mTransitions[i];
 
                 const bool stateMatches = trans.currentState == mCurrentState;
-                const bool eventMatches = (trans.event & currentEvents) != 0;
+                const bool eventMatches = ((uint8_t)trans.event & currentEvents) != 0;
 
                 if (stateMatches && eventMatches)
                 {

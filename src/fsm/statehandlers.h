@@ -5,7 +5,8 @@
 void StartIdle();
 void StartBatteryIndication();
 void StartGoodCardIndication();
-void StartBadCardIndication();
+void StartTimeleftCardIndication();
+void StartStorageIsFullIndication();
 void StartSlotMachine();
 void StartEnding();
 

@@ -5,14 +5,14 @@
 #include "../config/texts.h"
 #include "../config/timings.h"
 
-#include "../display/screens/typingscreen.h"
-#include "../display/screens/arrowscreen.h"
-#include "../display/screens/batteryscreen.h"
-#include "../display/screens/timeleftscreen.h"
-#include "../display/screenhandler.h"
-#include "../display/transitions/backlighttransition.h"
-#include "../display/transitions/shifttransition.h"
-#include "../display/transitions/dummytransition.h"
+#include "../ui/screens/typingscreen.h"
+#include "../ui/screens/arrowscreen.h"
+#include "../ui/screens/batteryscreen.h"
+#include "../ui/screens/timeleftscreen.h"
+#include "../ui/screenhandler.h"
+#include "../ui/transitions/backlighttransition.h"
+#include "../ui/transitions/shifttransition.h"
+#include "../ui/transitions/dummytransition.h"
 
 #include "peripherals.h"
 
@@ -30,12 +30,14 @@ extern TypingScreen endingScreen1;
 extern TypingScreen endingScreen2;
 extern BatteryScreen batteryScreen;
 extern TimeleftScreen timeleftScreen;
+extern TypingScreen storageScreen;
 
 // --- Наборы экранов ---
 extern Screenset idleScreenset;
 extern Screenset endingScreenset;
 extern Screenset batteryScreenset;
 extern Screenset timeleftScreenset;
+extern Screenset storageScreenset;
 
 // --- Обработчик ---
 extern ScreenHandler screenHandler;

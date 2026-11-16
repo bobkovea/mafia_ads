@@ -16,4 +16,7 @@ static const char EndingText1[] PROGMEM = "  vk.com/         mafiautopia";
 static const char EndingText2[] PROGMEM = "Кафе \"ЧЧ Лаунж\" пр.Ленина, 71а";
 
 // --- Timeleft ---
-static const char TimeleftText[] PROGMEM = "Возвращайся через";
+static const char TimeleftText[] PROGMEM = "Сыграй еще через";
+
+// --- Storage ---
+static const char StorageText[] PROGMEM = "Память заполненаЗайдите позже";

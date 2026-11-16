@@ -9,10 +9,7 @@
 class TimeleftScreen : public IScreen
 {
   public:
-    TimeleftScreen(
-        IDisplay& lcd,
-        const __FlashStringHelper* text,
-        const uint32_t typingPeriodMs) :
+    TimeleftScreen(IDisplay& lcd, const __FlashStringHelper* text, const uint32_t typingPeriodMs) :
         _lcd(lcd),
         _textTyper(lcd, text, typingPeriodMs),
         _timeleftUpdateTimer(MsInOneSecond)

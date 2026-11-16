@@ -4,44 +4,6 @@
 #include "..\app\displays.h"
 #include "..\app\statemachine_global.h"
 
-void StartIdle()
-{
-    cardController.Reset();
-    rfid.begin(9600);
-    screenHandler.SetScreenset(&idleScreenset);
-}
-
-void StartBatteryIndication()
-{
-    screenHandler.SetScreenset(&batteryScreenset);
-}
-
-void StartGoodCardIndication()
-{
-    musicPlayer.SetTrack(Track::Beep);
-    backlight.ResetDiscrete();
-    backlight.SetTotalDicsreteCycles(5U);
-    rfid.end();
-}
-
-void StartBadCardIndication()
-{
-    rfid.end();
-    musicPlayer.SetTrack(Track::Oops);
-    screenHandler.SetScreenset(&timeleftScreenset);
-    timeleftScreen.SetCardTimestamp(cardController.GetLastCardTimestamp());
-}
-
-void StartSlotMachine()
-{
-}
-
-void StartEnding()
-{
-    musicPlayer.SetTrack(Track::Godfather);
-    screenHandler.SetScreenset(&endingScreenset);
-}
-
 void HandleState(const State state, const uint32_t now)
 {
     switch (state)
@@ -56,12 +18,14 @@ void HandleState(const State state, const uint32_t now)
             break;
 
         case UploadStatus::ExistingCardTimeleft:
-            stateMachine.TriggerEvent(Event::BadCardDetected);
+            stateMachine.TriggerEvent(Event::TimeleftCardDetected);
             break;
 
-        case UploadStatus::NoCard:
         case UploadStatus::StorageIsFull:
-            // todo storage is full screen
+            stateMachine.TriggerEvent(Event::StorageIsFull);
+            break;
+        case UploadStatus::NoCard:
+        default:
             break;
         }
         break;
@@ -96,4 +60,50 @@ void HandleState(const State state, const uint32_t now)
             stateMachine.TriggerEvent(Event::IndicationFinished);
         break;
     }
+}
+
+void StartIdle()
+{
+    cardController.Reset();
+    rfid.begin(9600);
+    screenHandler.SetScreenset(&idleScreenset);
+}
+
+void StartBatteryIndication()
+{
+    rfid.end();
+    screenHandler.SetScreenset(&batteryScreenset);
+}
+
+void StartGoodCardIndication()
+{
+    musicPlayer.SetTrack(Track::Beep);
+    backlight.ResetDiscrete();
+    backlight.SetTotalDicsreteCycles(5U);
+    rfid.end();
+}
+
+void StartTimeleftCardIndication()
+{
+    rfid.end();
+    musicPlayer.SetTrack(Track::Oops);
+    screenHandler.SetScreenset(&timeleftScreenset);
+    timeleftScreen.SetCardTimestamp(cardController.GetLastCardTimestamp());
+}
+
+void StartStorageIsFullIndication()
+{
+    rfid.end();
+    musicPlayer.SetTrack(Track::Oops);
+    screenHandler.SetScreenset(&storageScreenset);
+}
+
+void StartSlotMachine()
+{
+}
+
+void StartEnding()
+{
+    musicPlayer.SetTrack(Track::Godfather);
+    screenHandler.SetScreenset(&endingScreenset);
 }

@@ -9,8 +9,8 @@
 #include "../card/cardcontroller.h"
 #include "../music/musicplayer.h"
 #include "../adc/batterymanager.h"
-#include "../display/lcd1602rus_hw.h"
-#include "../display/backlight.h"
+#include "../ui/lcd1602rus_hw.h"
+#include "../ui/backlight.h"
 
 extern SoftwareSerial rfid;
 extern CardReader cardReader;

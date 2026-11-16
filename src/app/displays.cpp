@@ -31,6 +31,9 @@ BatteryScreen batteryScreen(lcd, batteryManager);
 // --- TimeleftScreen ---
 TimeleftScreen timeleftScreen(lcd, FPSTR(TimeleftText), TimeleftScreenTypingPeriodMs);
 
+// --- StorageScreen ---
+TypingScreen storageScreen(lcd, FPSTR(StorageText), StorageScreenTypingPeriodMs);
+
 // --- IdleScreenset ---
 static ScreenItem idleScreenItems[] = {
     {&idleScreen0, IdleScreen0DurationMs},
@@ -61,6 +64,12 @@ static ScreenItem timeleftScreenItems[] = {{&timeleftScreen, TimeleftScreenDurat
 static constexpr uint8_t TimeleftScreenCount = sizeof(timeleftScreenItems) / sizeof(timeleftScreenItems[0]);
 Screenset timeleftScreenset = {
     timeleftScreenItems, TimeleftScreenCount, TimeleftScreensetDurationMs, &dummyTransition};
+
+// --- StorageScreenset ---
+static ScreenItem storageScreenItems[] = {{&storageScreen, StorageScreenDurationMs}};
+static constexpr uint8_t StorageScreenCount = sizeof(storageScreenItems) / sizeof(storageScreenItems[0]);
+Screenset storageScreenset = {
+    storageScreenItems, StorageScreenCount, StorageScreensetDurationMs, &dummyTransition};
 
 // --- ScreenHandler ---
 ScreenHandler screenHandler(&idleScreenset);

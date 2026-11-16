@@ -23,7 +23,7 @@ class ArrowScreen : public IScreen
         _currentText(text0),
         _arrowsBlinkTimer(arrowsBlinkPeriodMs),
         _textChangeTimer(textChangePeriodMs),
-        _textTyper(lcd, text0, typingPeriodMs) //todo add ctor with no text
+        _textTyper(lcd, text0, typingPeriodMs) // todo add ctor with no text
     {
     }
 
